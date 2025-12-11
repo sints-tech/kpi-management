@@ -14,7 +14,7 @@ services:
     name: ibgadgetstore
     runtime: python
     plan: free  # atau starter/professional untuk production
-    buildCommand: pip install --upgrade pip && pip install Pillow==10.4.0 && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear
+    buildCommand: pip install --upgrade pip --quiet && pip install Pillow==10.4.0 --quiet && pip install -r requirements.txt --quiet && python -c "import PIL; print('Pillow installed:', PIL.__version__)" && python manage.py check --deploy && python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear
     startCommand: gunicorn config.wsgi:application
     envVars:
       - key: SECRET_KEY
@@ -29,4 +29,3 @@ services:
         fromDatabase:
           name: ibgadgetstore-db
           property: connectionString
-
