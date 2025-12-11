@@ -101,9 +101,35 @@ fi
 
 # Collect static files with verbosity to see what's happening
 echo "📦 Running collectstatic..."
+# Use verbosity 3 to see all files being collected
+python manage.py collectstatic --noinput --clear --verbosity 3 2>&1 | grep -i vendor || echo "No vendor files found in collectstatic output"
 python manage.py collectstatic --noinput --clear --verbosity 2 || {
     echo "⚠️  collectstatic had warnings, but continuing..."
 }
+
+# After collectstatic, explicitly check and copy vendor if missing
+echo "🔍 Post-collectstatic vendor check..."
+if [ ! -d "staticfiles/vendor" ] && [ -d "src/assets/vendor" ]; then
+    echo "⚠️  Vendor not collected by collectstatic, manually copying..."
+    mkdir -p staticfiles/vendor
+    # Use Python to copy to handle paths correctly
+    python -c "
+import shutil
+import os
+from pathlib import Path
+
+src = Path('src/assets/vendor')
+dst = Path('staticfiles/vendor')
+
+if src.exists():
+    if dst.exists():
+        shutil.rmtree(dst)
+    shutil.copytree(src, dst)
+    print(f'✅ Copied {len(list(dst.rglob(\"*\")))} vendor files')
+else:
+    print('❌ Source vendor directory not found')
+"
+fi
 
 # Verify static files were collected
 echo "📁 Verifying static files collection..."
