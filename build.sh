@@ -60,15 +60,28 @@ echo "📂 STATICFILES_DIRS: $(python -c 'from django.conf import settings; prin
 
 # Verify vendor files exist before collectstatic
 echo "🔍 Checking for vendor files..."
+echo "📂 Current working directory: $(pwd)"
+echo "📂 Checking src/assets/vendor:"
 if [ -d "src/assets/vendor" ]; then
     echo "✅ Vendor directory found at src/assets/vendor"
     echo "📊 Vendor files count: $(find src/assets/vendor -type f | wc -l)"
     echo "📂 Sample vendor files:"
     find src/assets/vendor -type f | head -5
+    # Verify critical vendor files exist
+    if [ -f "src/assets/vendor/css/core.css" ] && [ -f "src/assets/vendor/libs/jquery/jquery.js" ]; then
+        echo "✅ Critical vendor files found!"
+    else
+        echo "⚠️  WARNING: Some critical vendor files missing!"
+    fi
 else
-    echo "⚠️  WARNING: Vendor directory not found at src/assets/vendor!"
+    echo "❌ ERROR: Vendor directory not found at src/assets/vendor!"
+    echo "📂 Listing current directory:"
+    ls -la
+    echo "📂 Listing src directory:"
+    ls -la src/ 2>/dev/null || echo "src directory does not exist"
     echo "📂 Listing src/assets directory:"
-    ls -la src/assets/ || echo "src/assets directory does not exist"
+    ls -la src/assets/ 2>/dev/null || echo "src/assets directory does not exist"
+    echo "❌ Build will fail if vendor files are not found!"
 fi
 
 # Collect static files with verbosity to see what's happening
