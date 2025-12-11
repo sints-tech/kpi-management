@@ -49,7 +49,7 @@ echo "🗄️ Running database migrations..."
 python manage.py migrate --noinput
 
 # Collect static files
-echo "📁 Collecting static files..."
-python manage.py collectstatic --noinput --clear
+       echo "📁 Collecting static files..."
+       python manage.py collectstatic --noinput --clear --verbosity=2
 
 echo "✅ Build completed successfully!"
