@@ -73,6 +73,16 @@ python manage.py collectstatic --noinput --clear --verbosity 2 || {
     echo "⚠️  WARNING: collectstatic had issues, but continuing..."
 }
 
+# Manually ensure vendor files are copied if they exist in source but not in staticfiles
+if [ -d "src/assets/vendor" ] && [ ! -d "staticfiles/vendor" ]; then
+    echo "📁 Vendor files not collected by collectstatic, copying manually..."
+    mkdir -p staticfiles/vendor
+    cp -r src/assets/vendor/* staticfiles/vendor/ 2>/dev/null || {
+        echo "⚠️  WARNING: Failed to copy vendor files manually"
+    }
+    echo "✅ Vendor files copied manually"
+fi
+
 # Verify static files were collected
 echo "📁 Verifying static files collection..."
 if [ -d "staticfiles" ] && [ "$(ls -A staticfiles 2>/dev/null)" ]; then
