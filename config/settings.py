@@ -213,7 +213,8 @@ WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh hanya di development
 WHITENOISE_INDEX_FILE = False  # Jangan serve index.html untuk directories
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
 WHITENOISE_MANIFEST_STRICT = False  # Jangan strict dengan manifest (lebih toleran)
-WHITENOISE_ROOT = STATIC_ROOT  # Explicitly set root untuk WhiteNoise
+# Jangan set WHITENOISE_ROOT karena WhiteNoise akan otomatis menggunakan STATIC_ROOT
+# Jika set, WhiteNoise hanya akan mencari di root tersebut dan tidak akan fallback ke STATICFILES_DIRS
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"
