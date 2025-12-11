@@ -1,0 +1,37 @@
+{% extends layout_path %}{% load static %}{% load theme %}{% block title %}Detail FYP Post Value{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row"><div class="col-12"><div class="card">
+  <div class="card-header d-flex justify-content-between"><h5 class="mb-0">Detail FYP Post Value</h5>
+    <div><a href="{% url 'kpi_management:fyppostvalue-update' fyp_post.pk %}" class="btn btn-primary"><i class="icon-base bx bx-edit me-1"></i> Edit</a>
+    <a href="{% url 'kpi_management:fyppostvalue-list' %}" class="btn btn-label-secondary"><i class="icon-base bx bx-arrow-back me-1"></i> Kembali</a></div>
+  </div>
+  <div class="card-body">
+    <div class="row mb-4"><div class="col-md-6"><h6>Judul Post</h6><p>{{ fyp_post.post_title }}</p></div>
+    <div class="col-md-6"><h6>Platform</h6><p><span class="badge bg-label-info">{{ fyp_post.get_platform_display }}</span></p></div></div>
+    <div class="row mb-4"><div class="col-md-6"><h6>Nama Akun</h6><p>{{ fyp_post.account_name }}</p></div>
+    <div class="col-md-6">
+      <h6>URL Post</h6>
+      <p>
+        <a href="{{ fyp_post.post_url }}" target="_blank" class="btn btn-outline-primary">
+          <i class="icon-base bx bx-link-external me-1"></i> Kunjungi Post
+        </a>
+      </p>
+    </div></div>
+    <div class="row mb-4">
+      <div class="col-md-3"><h6>FYP Views</h6><p class="fs-4">{{ fyp_post.fyp_views|default:0 }}</p></div>
+      <div class="col-md-3"><h6>Total Views</h6><p class="fs-4">{{ fyp_post.total_views|default:0 }}</p></div>
+      <div class="col-md-3"><h6>FYP %</h6><p class="fs-4">{{ fyp_post.fyp_percentage|floatformat:2 }}%</p></div>
+      <div class="col-md-3"><h6>Viral Score</h6><p class="fs-4">{{ fyp_post.viral_score|floatformat:2 }}</p></div>
+    </div>
+    <div class="row mb-4"><div class="col-md-6"><h6>Engagement Value</h6><p class="fs-4">{{ fyp_post.engagement_value|format_k }}</p></div>
+    <div class="col-md-6"><h6>Estimated Reach</h6><p class="fs-4">{{ fyp_post.estimated_reach|default:0 }}</p></div></div>
+    {% if fyp_post.notes %}<div class="mb-4"><h6>Catatan</h6><p>{{ fyp_post.notes }}</p></div>{% endif %}
+  </div>
+</div></div></div>
+{% endblock %}
+

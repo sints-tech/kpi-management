@@ -1,0 +1,35 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Hapus Story{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Konfirmasi Hapus Story</h5>
+      </div>
+      <div class="card-body">
+        <p>Apakah Anda yakin ingin menghapus story <strong>"{{ story.title }}"</strong>?</p>
+        <p class="text-danger">Tindakan ini tidak dapat dibatalkan.</p>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'kpi_management:story-list' %}" class="btn btn-label-secondary">Batal</a>
+            <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

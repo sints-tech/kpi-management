@@ -1,0 +1,168 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title|default:"Story Form" }}{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">{{ title|default:"Story Form" }}</h5>
+      </div>
+      <div class="card-body">
+        <!-- Display non-field errors -->
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger mb-4">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+        
+        <!-- Display all errors summary -->
+        {% if form.errors %}
+          <div class="alert alert-warning mb-4">
+            <strong>Periksa form berikut:</strong>
+            <ul class="mb-0 mt-2">
+              {% for field in form %}
+                {% if field.errors %}
+                  <li>{{ field.label }}: {{ field.errors|striptags }}</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+        
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.title.label }}</label>
+              {{ form.title }}
+              {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.platform.label }}</label>
+              {{ form.platform }}
+              {% if form.platform.errors %}
+                <div class="text-danger">{{ form.platform.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.account_name.label }}</label>
+              {{ form.account_name }}
+              {% if form.account_name.errors %}
+                <div class="text-danger">{{ form.account_name.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.story_date.label }}</label>
+              {{ form.story_date }}
+              {% if form.story_date.errors %}
+                <div class="text-danger">{{ form.story_date.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-12">
+              <label class="form-label">{{ form.content_url.label }}</label>
+              <div class="input-group">
+                {{ form.content_url }}
+                {% if form.content_url.value %}
+                <a href="{{ form.content_url.value }}" target="_blank" class="btn btn-outline-primary" type="button">
+                  <i class="bx bx-link-external"></i> Kunjungi
+                </a>
+                {% endif %}
+              </div>
+              {% if form.content_url.errors %}
+                <div class="text-danger">{{ form.content_url.errors }}</div>
+              {% endif %}
+              <small class="text-muted">Masukkan URL tautan konten story (opsional)</small>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">{{ form.views.label }}</label>
+              {{ form.views }}
+              {% if form.views.errors %}
+                <div class="text-danger">{{ form.views.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.impressions.label }}</label>
+              {{ form.impressions }}
+              {% if form.impressions.errors %}
+                <div class="text-danger">{{ form.impressions.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">{{ form.reach.label }}</label>
+              {{ form.reach }}
+              {% if form.reach.errors %}
+                <div class="text-danger">{{ form.reach.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.engagement_rate.label }}</label>
+              {{ form.engagement_rate }}
+              {% if form.engagement_rate.errors %}
+                <div class="text-danger">{{ form.engagement_rate.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.link_clicks.label }}</label>
+              {{ form.link_clicks }}
+              {% if form.link_clicks.errors %}
+                <div class="text-danger">{{ form.link_clicks.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.status.label }}</label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div class="text-danger">{{ form.status.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">{{ form.notes.label }}</label>
+            {{ form.notes }}
+            {% if form.notes.errors %}
+              <div class="text-danger">{{ form.notes.errors }}</div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'kpi_management:story-list' %}" class="btn btn-label-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
+

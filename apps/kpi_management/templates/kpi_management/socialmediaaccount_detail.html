@@ -1,0 +1,235 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Detail Akun Sosial Media{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Detail Akun Sosial Media</h5>
+        <div>
+          <a href="{% url 'kpi_management:socialmediaaccount-update' account.pk %}" class="btn btn-primary">
+            <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+          </a>
+          <a href="{% url 'kpi_management:socialmediaaccount-list' %}" class="btn btn-label-secondary">
+            <i class="icon-base bx bx-arrow-back me-1"></i> Kembali
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <h6 class="mb-3">Informasi Platform</h6>
+            <table class="table table-borderless">
+              <tr>
+                <th width="40%">Platform:</th>
+                <td><span class="badge bg-label-primary">{{ account.get_platform_display }}</span></td>
+              </tr>
+              <tr>
+                <th>Nama Akun:</th>
+                <td><strong>{{ account.account_name }}</strong></td>
+              </tr>
+              {% if account.account_id %}
+              <tr>
+                <th>ID Akun:</th>
+                <td>{{ account.account_id }}</td>
+              </tr>
+              {% endif %}
+              {% if account.display_name %}
+              <tr>
+                <th>Nama Tampilan:</th>
+                <td>{{ account.display_name }}</td>
+              </tr>
+              {% endif %}
+              {% if account.profile_url %}
+              <tr>
+                <th>URL Profil:</th>
+                <td>
+                  <a href="{{ account.profile_url }}" target="_blank" class="btn btn-outline-primary">
+                    <i class="icon-base bx bx-link-external me-1"></i> Kunjungi Profil
+                  </a>
+                </td>
+              </tr>
+              {% endif %}
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="mb-3">Status & Pengaturan</h6>
+            <table class="table table-borderless">
+              <tr>
+                <th width="40%">Status:</th>
+                <td>
+                  {% if account.status == 'active' %}
+                    <span class="badge bg-label-success">{{ account.get_status_display }}</span>
+                  {% elif account.status == 'inactive' %}
+                    <span class="badge bg-label-secondary">{{ account.get_status_display }}</span>
+                  {% elif account.status == 'suspended' %}
+                    <span class="badge bg-label-warning">{{ account.get_status_display }}</span>
+                  {% else %}
+                    <span class="badge bg-label-danger">{{ account.get_status_display }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>Terverifikasi:</th>
+                <td>
+                  {% if account.is_verified %}
+                    <span class="badge bg-label-success"><i class="icon-base bx bx-check-circle"></i> Ya</span>
+                  {% else %}
+                    <span class="badge bg-label-secondary">Tidak</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <th>Akun Bisnis:</th>
+                <td>
+                  {% if account.is_business_account %}
+                    <span class="badge bg-label-info"><i class="icon-base bx bx-briefcase"></i> Ya</span>
+                  {% else %}
+                    <span class="badge bg-label-secondary">Tidak</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <h6 class="mb-3">Informasi Pemilik & Perusahaan</h6>
+            <table class="table table-borderless">
+              {% if account.company %}
+              <tr>
+                <th width="40%">Perusahaan:</th>
+                <td>
+                  <span class="badge bg-label-primary">{{ account.company.name }}</span>
+                  <small class="text-muted">({{ account.company.get_company_type_display }})</small>
+                </td>
+              </tr>
+              {% endif %}
+              {% if account.owner %}
+              <tr>
+                <th>Pemilik:</th>
+                <td>{{ account.owner.get_full_name|default:account.owner.username }}</td>
+              </tr>
+              {% endif %}
+              {% if account.profile %}
+              <tr>
+                <th>Profil:</th>
+                <td>{{ account.profile.brand_name|default:"-" }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <th>Metode Input:</th>
+                <td>
+                  <span class="badge {% if account.input_method == 'api' %}bg-label-info{% else %}bg-label-secondary{% endif %}">
+                    {{ account.get_input_method_display }}
+                  </span>
+                  {% if account.auto_sync_enabled %}
+                    <span class="badge bg-label-success ms-2">Auto Sync: {{ account.sync_schedule|default:"-" }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            </table>
+          </div>
+          <div class="col-md-6">
+            <h6 class="mb-3">Statistik Akun</h6>
+            <table class="table table-borderless">
+              <tr>
+                <th width="40%">Followers:</th>
+                <td><strong>{{ account.followers_count|floatformat:0|default:"0" }}</strong></td>
+              </tr>
+              <tr>
+                <th>Following:</th>
+                <td>{{ account.following_count|floatformat:0|default:"0" }}</td>
+              </tr>
+              <tr>
+                <th>Postingan:</th>
+                <td>{{ account.posts_count|floatformat:0|default:"0" }}</td>
+              </tr>
+              <tr>
+                <th>Engagement Rate:</th>
+                <td><strong>{{ account.engagement_rate|floatformat:2|default:"0.00" }}%</strong></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        {% if account.connected_at or account.last_synced_at or account.notes %}
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <h6 class="mb-3">Informasi Tambahan</h6>
+            <table class="table table-borderless">
+              {% if account.connected_at %}
+              <tr>
+                <th width="20%">Terhubung:</th>
+                <td>{{ account.connected_at|date:"d M Y H:i" }}</td>
+              </tr>
+              {% endif %}
+              {% if account.last_synced_at %}
+              <tr>
+                <th>Terakhir Sinkronisasi:</th>
+                <td>{{ account.last_synced_at|date:"d M Y H:i" }}</td>
+              </tr>
+              {% endif %}
+              {% if account.notes %}
+              <tr>
+                <th>Catatan:</th>
+                <td>{{ account.notes|linebreaks }}</td>
+              </tr>
+              {% endif %}
+              {% if account.tags %}
+              <tr>
+                <th>Tags:</th>
+                <td>
+                  {% if account.tags|length > 0 %}
+                    {% for tag in account.tags %}
+                      <span class="badge bg-label-info me-1">{{ tag }}</span>
+                    {% endfor %}
+                  {% else %}
+                    -
+                  {% endif %}
+                </td>
+              </tr>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="d-flex justify-content-end gap-2">
+              <a href="{% url 'kpi_management:socialmediaaccount-list' %}" class="btn btn-label-secondary">
+                <i class="icon-base bx bx-arrow-back me-1"></i> Kembali
+              </a>
+              {% if account.input_method == 'api' and account.access_token %}
+              <a href="{% url 'kpi_management:socialmediaaccount-sync' account.pk %}" class="btn btn-info">
+                <i class="icon-base bx bx-refresh me-1"></i> Sync Data
+              </a>
+              <a href="{% url 'kpi_management:socialmediaaccount-sync-insights' account.pk %}" class="btn btn-warning">
+                <i class="icon-base bx bx-bar-chart-alt-2 me-1"></i> Sync Insights
+              </a>
+              {% endif %}
+              <a href="{% url 'kpi_management:socialmediaaccount-update' account.pk %}" class="btn btn-primary">
+                <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+              </a>
+              <a href="{% url 'kpi_management:socialmediaaccount-delete' account.pk %}" class="btn btn-danger">
+                <i class="icon-base bx bx-trash me-1"></i> Hapus
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

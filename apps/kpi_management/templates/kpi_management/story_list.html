@@ -1,0 +1,577 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Story Management{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Story Management</h5>
+        <div class="d-flex gap-2">
+          <a href="{% url 'kpi_management:story-export-csv' %}" class="btn btn-outline-success">
+            <i class="icon-base bx bx-download me-1"></i>
+            Export CSV
+          </a>
+          <a href="{% url 'kpi_management:story-create' %}" class="btn btn-primary">
+            <i class="icon-base bx bx-plus me-1"></i>
+            Tambah Story
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Search and Filter -->
+        <form method="get" class="mb-4">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <input type="text" name="search" class="form-control" placeholder="Cari judul atau akun..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-2">
+              <select name="company" class="form-select">
+                <option value="">Semua Perusahaan</option>
+                {% for company in companies %}
+                <option value="{{ company.id }}" {% if request.GET.company == company.id|stringformat:"s" %}selected{% endif %}>
+                  {{ company.name }} ({{ company.get_company_type_display }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select name="platform" class="form-select">
+                <option value="">Semua Platform</option>
+                <option value="instagram" {% if request.GET.platform == 'instagram' %}selected{% endif %}>Instagram</option>
+                <option value="facebook" {% if request.GET.platform == 'facebook' %}selected{% endif %}>Facebook</option>
+                <option value="tiktok" {% if request.GET.platform == 'tiktok' %}selected{% endif %}>TikTok</option>
+                <option value="twitter" {% if request.GET.platform == 'twitter' %}selected{% endif %}>Twitter</option>
+                <option value="youtube" {% if request.GET.platform == 'youtube' %}selected{% endif %}>YouTube</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select name="status" class="form-select">
+                <option value="">Semua Status</option>
+                <option value="draft" {% if request.GET.status == 'draft' %}selected{% endif %}>Draft</option>
+                <option value="published" {% if request.GET.status == 'published' %}selected{% endif %}>Published</option>
+                <option value="archived" {% if request.GET.status == 'archived' %}selected{% endif %}>Archived</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select name="account_name" class="form-select">
+                <option value="">Semua Akun</option>
+                {% for account in social_media_accounts %}
+                <option value="{{ account.account_name }}" {% if request.GET.account_name == account.account_name %}selected{% endif %}>
+                  {{ account.get_platform_display }} - {{ account.account_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Bulk Actions -->
+        {% if is_admin %}
+        <form method="post" action="{% url 'kpi_management:story-bulk-action' %}" id="bulkActionForm" class="mb-3">
+          {% csrf_token %}
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <select name="action" class="form-select" id="bulkActionSelect" required>
+                <option value="">Pilih Aksi...</option>
+                <option value="update_status">Update Status</option>
+                <option value="assign_campaign">Assign Campaign</option>
+                <option value="delete">Hapus</option>
+              </select>
+            </div>
+            <div class="col-md-4" id="bulkActionExtra" style="display: none;">
+              <select name="new_status" class="form-select" id="newStatusSelect" style="display: none;">
+                <option value="draft">Draft</option>
+                <option value="published">Published</option>
+                <option value="archived">Archived</option>
+              </select>
+              <select name="campaign_id" class="form-select" id="campaignSelect" style="display: none;">
+                <option value="">Pilih Campaign...</option>
+                {% for campaign in campaigns %}
+                <option value="{{ campaign.id }}">{{ campaign.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-warning" id="bulkActionBtn" disabled>
+                <i class="icon-base bx bx-check me-1"></i>
+                Terapkan ke Selected
+              </button>
+            </div>
+          </div>
+        </form>
+        {% endif %}
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                {% if is_admin %}
+                <th width="50">
+                  <input type="checkbox" id="selectAll" class="form-check-input">
+                </th>
+                {% endif %}
+                <th>Judul</th>
+                <th>Platform</th>
+                <th>Akun</th>
+                <th>Views</th>
+                <th>Reach</th>
+                <th>Engagement Rate</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for story in page_obj %}
+              <tr>
+                {% if is_admin %}
+                <td>
+                  <input type="checkbox" name="story_ids" value="{{ story.id }}" class="form-check-input story-checkbox">
+                </td>
+                {% endif %}
+                <td><strong>{{ story.title }}</strong></td>
+                <td>
+                  <span class="badge bg-label-info">{{ story.get_platform_display }}</span>
+                </td>
+                <td>{{ story.account_name }}</td>
+                <td>{{ story.views|default:0 }}</td>
+                <td>{{ story.reach|default:0 }}</td>
+                <td>{{ story.engagement_rate|floatformat:2 }}%</td>
+                <td>{{ story.story_date|date:"d M Y" }}</td>
+                <td>
+                  {% if story.status == 'published' %}
+                    <span class="badge bg-label-success">Published</span>
+                  {% elif story.status == 'draft' %}
+                    <span class="badge bg-label-warning">Draft</span>
+                  {% else %}
+                    <span class="badge bg-label-secondary">Archived</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                      <i class="icon-base bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="{% url 'kpi_management:story-detail' story.pk %}">
+                        <i class="icon-base bx bx-show me-1"></i> Detail
+                      </a>
+                      {% if story.content_url %}
+                      <a class="dropdown-item" href="{{ story.content_url }}" target="_blank">
+                        <i class="icon-base bx bx-link-external me-1"></i> Kunjungi Konten
+                      </a>
+                      {% endif %}
+                      <a class="dropdown-item" href="{% url 'kpi_management:story-update' story.pk %}">
+                        <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+                      </a>
+                      <a class="dropdown-item text-danger" href="{% url 'kpi_management:story-delete' story.pk %}">
+                        <i class="icon-base bx bx-trash me-1"></i> Hapus
+                      </a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="{% if is_admin %}10{% else %}9{% endif %}" class="text-center">Tidak ada data story</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.platform %}&platform={{ request.GET.platform }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.campaign %}&campaign={{ request.GET.campaign }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item active">
+              <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.platform %}&platform={{ request.GET.platform }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.campaign %}&campaign={{ request.GET.campaign }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics & Visualization Section -->
+<div class="row g-4 mb-4">
+  <!-- Performance Trend Chart -->
+  <div class="col-xl-8 col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Performance Trend (30 Hari Terakhir)</h5>
+      </div>
+      <div class="card-body">
+        <div id="storyTrendChart" style="min-height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Comparison Chart -->
+  <div class="col-xl-4 col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Platform Comparison</h5>
+      </div>
+      <div class="card-body">
+        <div id="storyPlatformChart" style="min-height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Best Performing Stories -->
+{% if best_stories %}
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Best Performing Stories</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Title</th>
+                <th>Platform</th>
+                <th>Views</th>
+                <th>Engagement Rate</th>
+                <th>Performance Rating</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for story in best_stories %}
+              <tr>
+                <td><span class="badge bg-label-primary">{{ forloop.counter }}</span></td>
+                <td><strong>{{ story.title }}</strong></td>
+                <td><span class="badge bg-label-info">{{ story.get_platform_display }}</span></td>
+                <td>{{ story.views|default:0 }}</td>
+                <td>{{ story.engagement_rate|floatformat:2 }}%</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    <div class="progress w-100 me-2" style="height: 8px;">
+                      <div class="progress-bar" role="progressbar" style="width: {{ story.performance_rating|floatformat:0 }}%" aria-valuenow="{{ story.performance_rating }}" aria-valuemin="0" aria-valuemax="10"></div>
+                    </div>
+                    <span class="text-muted">{{ story.performance_rating|floatformat:1 }}/10</span>
+                  </div>
+                </td>
+                <td>{{ story.story_date|date:"d M Y" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}"/>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+<script>
+  'use strict';
+
+  // Bulk Actions
+  const selectAll = document.getElementById('selectAll');
+  const storyCheckboxes = document.querySelectorAll('.story-checkbox');
+  const bulkActionSelect = document.getElementById('bulkActionSelect');
+  const bulkActionExtra = document.getElementById('bulkActionExtra');
+  const newStatusSelect = document.getElementById('newStatusSelect');
+  const campaignSelect = document.getElementById('campaignSelect');
+  const bulkActionBtn = document.getElementById('bulkActionBtn');
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      storyCheckboxes.forEach(cb => cb.checked = this.checked);
+      updateBulkActionBtn();
+    });
+  }
+
+  if (storyCheckboxes.length > 0) {
+    storyCheckboxes.forEach(cb => {
+      cb.addEventListener('change', updateBulkActionBtn);
+    });
+  }
+
+  function updateBulkActionBtn() {
+    const checked = document.querySelectorAll('.story-checkbox:checked').length;
+    if (bulkActionBtn) {
+      bulkActionBtn.disabled = !(checked > 0 && bulkActionSelect.value);
+    }
+  }
+
+  if (bulkActionSelect) {
+    bulkActionSelect.addEventListener('change', function() {
+      const action = this.value;
+      if (action) {
+        bulkActionExtra.style.display = 'block';
+        newStatusSelect.style.display = action === 'update_status' ? 'block' : 'none';
+        campaignSelect.style.display = action === 'assign_campaign' ? 'block' : 'none';
+      } else {
+        bulkActionExtra.style.display = 'none';
+      }
+      updateBulkActionBtn();
+    });
+  }
+
+  if (bulkActionBtn) {
+    bulkActionBtn.addEventListener('click', function(e) {
+      const checked = document.querySelectorAll('.story-checkbox:checked').length;
+      if (checked === 0) {
+        e.preventDefault();
+        alert('Pilih minimal satu story!');
+        return false;
+      }
+      if (!confirm(`Yakin ingin melakukan aksi ini pada ${checked} story?`)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  }
+
+  // Wait for ApexCharts to be loaded and initialize charts
+  function initStoryCharts() {
+    if (typeof ApexCharts === 'undefined') {
+      console.warn('ApexCharts not loaded yet, retrying...');
+      setTimeout(initStoryCharts, 100);
+      return;
+    }
+
+    // Story Analytics Charts
+    let storyTrendData = { dates: [], views: [], engagement: [], reach: [] };
+    let storyPlatformData = { labels: ['Instagram', 'TikTok', 'Facebook', 'YouTube'], avg_engagement: [0, 0, 0, 0], total_views: [0, 0, 0, 0], count: [0, 0, 0, 0] };
+
+    try {
+      // Parse JSON data from context
+      {% if story_trend_data %}
+      const storyTrendDataStr = {{ story_trend_data|safe }};
+      if (storyTrendDataStr && typeof storyTrendDataStr === 'string' && storyTrendDataStr.trim() !== '' && storyTrendDataStr !== '{}') {
+        storyTrendData = JSON.parse(storyTrendDataStr);
+      } else if (typeof storyTrendDataStr === 'object' && storyTrendDataStr !== null) {
+        storyTrendData = storyTrendDataStr;
+      }
+      // Validate data structure
+      if (!storyTrendData.dates) storyTrendData.dates = [];
+      if (!storyTrendData.views) storyTrendData.views = [];
+      if (!storyTrendData.engagement) storyTrendData.engagement = [];
+      if (!storyTrendData.reach) storyTrendData.reach = [];
+      {% endif %}
+    } catch(e) {
+      console.error('Error parsing storyTrendData:', e);
+      storyTrendData = { dates: [], views: [], engagement: [], reach: [] };
+    }
+
+    try {
+      {% if story_platform_data %}
+      const storyPlatformDataStr = {{ story_platform_data|safe }};
+      if (storyPlatformDataStr && typeof storyPlatformDataStr === 'string' && storyPlatformDataStr.trim() !== '' && storyPlatformDataStr !== '{}') {
+        storyPlatformData = JSON.parse(storyPlatformDataStr);
+      } else if (typeof storyPlatformDataStr === 'object' && storyPlatformDataStr !== null) {
+        storyPlatformData = storyPlatformDataStr;
+      }
+      // Validate data structure
+      if (!storyPlatformData.labels) storyPlatformData.labels = ['Instagram', 'TikTok', 'Facebook', 'YouTube'];
+      if (!storyPlatformData.avg_engagement) storyPlatformData.avg_engagement = [0, 0, 0, 0];
+      if (!storyPlatformData.total_views) storyPlatformData.total_views = [0, 0, 0, 0];
+      if (!storyPlatformData.count) storyPlatformData.count = [0, 0, 0, 0];
+      {% endif %}
+    } catch(e) {
+      console.error('Error parsing storyPlatformData:', e);
+      storyPlatformData = { labels: ['Instagram', 'TikTok', 'Facebook', 'YouTube'], avg_engagement: [0, 0, 0, 0], total_views: [0, 0, 0, 0], count: [0, 0, 0, 0] };
+    }
+
+    // Story Trend Chart
+    const storyTrendChartEl = document.querySelector('#storyTrendChart');
+    if (storyTrendChartEl) {
+      // Ensure data exists with default values
+      if (!storyTrendData.dates || storyTrendData.dates.length === 0) {
+        // Create default dates for last 30 days
+        const dates = [];
+        for (let i = 29; i >= 0; i--) {
+          const date = new Date();
+          date.setDate(date.getDate() - i);
+          dates.push(date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
+        }
+        storyTrendData = {
+          dates: dates,
+          views: new Array(30).fill(0),
+          engagement: new Array(30).fill(0),
+          reach: new Array(30).fill(0)
+        };
+      }
+
+      // Ensure arrays have same length
+      const dataLength = storyTrendData.dates.length;
+      if (storyTrendData.views.length !== dataLength) {
+        storyTrendData.views = storyTrendData.views.slice(0, dataLength).concat(new Array(Math.max(0, dataLength - storyTrendData.views.length)).fill(0));
+      }
+      if (storyTrendData.engagement.length !== dataLength) {
+        storyTrendData.engagement = storyTrendData.engagement.slice(0, dataLength).concat(new Array(Math.max(0, dataLength - storyTrendData.engagement.length)).fill(0));
+      }
+      if (storyTrendData.reach.length !== dataLength) {
+        storyTrendData.reach = storyTrendData.reach.slice(0, dataLength).concat(new Array(Math.max(0, dataLength - storyTrendData.reach.length)).fill(0));
+      }
+
+      const storyTrendChartConfig = {
+        chart: {
+          height: 300,
+          type: 'line',
+          toolbar: { show: false }
+        },
+        series: [
+          {
+            name: 'Views',
+            data: storyTrendData.views || []
+          },
+          {
+            name: 'Engagement Rate (%)',
+            data: storyTrendData.engagement || []
+          },
+          {
+            name: 'Reach',
+            data: storyTrendData.reach || []
+          }
+        ],
+        xaxis: {
+          categories: storyTrendData.dates || [],
+          labels: {
+            rotate: -45,
+            rotateAlways: true
+          }
+        },
+        colors: ['#696cff', '#71dd37', '#ffab00'],
+        stroke: {
+          width: 2,
+          curve: 'smooth'
+        },
+        markers: {
+          size: 4
+        },
+        legend: {
+          show: true,
+          position: 'top'
+        }
+      };
+      try {
+        const storyTrendChart = new ApexCharts(storyTrendChartEl, storyTrendChartConfig);
+        storyTrendChart.render();
+        console.log('✅ Story Trend Chart rendered successfully');
+      } catch(e) {
+        console.error('❌ Error rendering Story Trend Chart:', e);
+      }
+    } else {
+      console.warn('⚠️  Story Trend Chart element not found');
+    }
+
+    // Story Platform Comparison Chart
+    const storyPlatformChartEl = document.querySelector('#storyPlatformChart');
+    if (storyPlatformChartEl) {
+      // Ensure data exists
+      if (!storyPlatformData.labels || storyPlatformData.labels.length === 0) {
+        storyPlatformData = {
+          labels: ['Instagram', 'TikTok', 'Facebook', 'YouTube'],
+          avg_engagement: [0, 0, 0, 0],
+          total_views: [0, 0, 0, 0],
+          count: [0, 0, 0, 0]
+        };
+      }
+
+      // Ensure arrays have same length as labels
+      const labelLength = storyPlatformData.labels.length;
+      if (storyPlatformData.avg_engagement.length !== labelLength) {
+        storyPlatformData.avg_engagement = storyPlatformData.avg_engagement.slice(0, labelLength).concat(new Array(Math.max(0, labelLength - storyPlatformData.avg_engagement.length)).fill(0));
+      }
+
+      const storyPlatformChartConfig = {
+        chart: {
+          height: 300,
+          type: 'bar',
+          toolbar: { show: false }
+        },
+        series: [
+          {
+            name: 'Avg Engagement Rate (%)',
+            data: storyPlatformData.avg_engagement || []
+          }
+        ],
+        xaxis: {
+          categories: storyPlatformData.labels || []
+        },
+        colors: ['#696cff'],
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '60%',
+            endingShape: 'rounded'
+          }
+        },
+        dataLabels: {
+          enabled: true,
+          formatter: function(val) {
+            return val.toFixed(1) + '%';
+          }
+        },
+        legend: {
+          show: false
+        }
+      };
+      try {
+        const storyPlatformChart = new ApexCharts(storyPlatformChartEl, storyPlatformChartConfig);
+        storyPlatformChart.render();
+        console.log('✅ Story Platform Chart rendered successfully');
+      } catch(e) {
+        console.error('❌ Error rendering Story Platform Chart:', e);
+      }
+    } else {
+      console.warn('⚠️  Story Platform Chart element not found');
+    }
+  }
+
+  // Initialize charts when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initStoryCharts);
+  } else {
+    initStoryCharts();
+  }
+</script>
+{% endblock page_js %}
+

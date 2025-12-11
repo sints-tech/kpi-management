@@ -1,0 +1,583 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+{% load theme %}
+
+{% block title %}Dashboard Management{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}"/>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Dashboard Management</h5>
+        <div class="d-flex gap-2">
+          <form method="get" class="d-inline d-flex gap-2">
+            <select name="company" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto; display: inline-block;">
+              <option value="">Semua Perusahaan</option>
+              {% for company in companies %}
+              <option value="{{ company.id }}" {% if request.GET.company == company.id|stringformat:"s" %}selected{% endif %}>
+                {{ company.name }} ({{ company.get_company_type_display }})
+              </option>
+              {% endfor %}
+            </select>
+            <select name="account_name" class="form-select form-select-sm" onchange="this.form.submit()" style="width: auto; display: inline-block;">
+              <option value="">Semua Akun</option>
+              {% for account in social_media_accounts %}
+              <option value="{{ account.account_name }}" {% if request.GET.account_name == account.account_name %}selected{% endif %}>
+                {{ account.get_platform_display }} - {{ account.account_name }}
+              </option>
+              {% endfor %}
+            </select>
+          </form>
+          {% if is_admin %}
+          <a href="{% url 'kpi_management:dashboard-settings' %}" class="btn btn-outline-primary">
+            <i class="icon-base bx bx-cog me-1"></i>
+            Settings
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-xl-3 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <span class="text-heading">Total Campaign</span>
+                    <h3 class="mb-0 mt-2">{{ total_campaigns|default:0 }}</h3>
+                  </div>
+                  <div class="avatar">
+                    <div class="avatar-initial bg-label-primary rounded">
+                      <i class="icon-base bx bx-bullseye fs-4"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <span class="text-heading">Total Story</span>
+                    <h3 class="mb-0 mt-2">{{ total_stories|default:0 }}</h3>
+                  </div>
+                  <div class="avatar">
+                    <div class="avatar-initial bg-label-info rounded">
+                      <i class="icon-base bx bx-book-content fs-4"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <span class="text-heading">Total FYP Post</span>
+                    <h3 class="mb-0 mt-2">{{ total_fyp_posts|default:0 }}</h3>
+                  </div>
+                  <div class="avatar">
+                    <div class="avatar-initial bg-label-success rounded">
+                      <i class="icon-base bx bx-trending-up fs-4"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <span class="text-heading">Engagement Rata-rata</span>
+                    <h3 class="mb-0 mt-2">{{ engagement_avg|default:0|floatformat:2 }}%</h3>
+                  </div>
+                  <div class="avatar">
+                    <div class="avatar-initial bg-label-warning rounded">
+                      <i class="icon-base bx bx-bar-chart-alt-2 fs-4"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Revenue Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-xl-6 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <span class="text-heading">Total Revenue</span>
+                    <h3 class="mb-0 mt-2">{{ total_revenue|default:0|format_k }}</h3>
+                  </div>
+                  <div class="avatar">
+                    <div class="avatar-initial bg-label-success rounded">
+                      <i class="icon-base bx bx-dollar fs-4"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-xl-6 col-md-6">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <span class="text-heading">Pending Revenue</span>
+                    <h3 class="mb-0 mt-2">{{ pending_revenue|default:0|format_k }}</h3>
+                  </div>
+                  <div class="avatar">
+                    <div class="avatar-initial bg-label-warning rounded">
+                      <i class="icon-base bx bx-time fs-4"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">Quick Actions</h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  <div class="col-md-3 col-sm-6">
+                    <a href="{% url 'kpi_management:story-create' %}" class="btn btn-primary w-100">
+                      <i class="icon-base bx bx-plus me-2"></i>
+                      Buat Story Baru
+                    </a>
+                  </div>
+                  <div class="col-md-3 col-sm-6">
+                    <a href="{% url 'kpi_management:campaign-create' %}" class="btn btn-warning w-100">
+                      <i class="icon-base bx bx-plus me-2"></i>
+                      Buat Campaign Baru
+                    </a>
+                  </div>
+                  <div class="col-md-3 col-sm-6">
+                    <a href="{% url 'kpi_management:report-list' %}" class="btn btn-info w-100">
+                      <i class="icon-base bx bx-file me-2"></i>
+                      Lihat Report Terbaru
+                    </a>
+                  </div>
+                  <div class="col-md-3 col-sm-6">
+                    <a href="{% url 'kpi_management:fyp-leaderboard' %}" class="btn btn-success w-100">
+                      <i class="icon-base bx bx-trophy me-2"></i>
+                      FYP Leaderboard
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">Notifications</h5>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="alert alert-warning mb-0">
+                      <i class="icon-base bx bx-info-circle me-2"></i>
+                      <strong>{{ pending_campaigns }}</strong> Campaign Pending Approval
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="alert alert-info mb-0">
+                      <i class="icon-base bx bx-info-circle me-2"></i>
+                      <strong>{{ pending_collabs }}</strong> Collab Pending Approval
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="alert alert-secondary mb-0">
+                      <i class="icon-base bx bx-info-circle me-2"></i>
+                      <strong>{{ under_review_feeds }}</strong> Feed Under Review
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Grafik & Visualisasi -->
+        <div class="row g-4 mb-4">
+          <!-- Line Chart - Trend Performa -->
+          <div class="col-xl-8 col-lg-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Trend Performa 7 Hari Terakhir</h5>
+              </div>
+              <div class="card-body">
+                <div id="trendChart" style="min-height: 300px;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pie Chart - Distribusi Status -->
+          <div class="col-xl-4 col-lg-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Distribusi Konten</h5>
+              </div>
+              <div class="card-body">
+                <div id="statusChart" style="min-height: 300px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bar Chart - Perbandingan Platform -->
+        <div class="row g-4 mb-4">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Perbandingan Performa Antar Platform</h5>
+              </div>
+              <div class="card-body">
+                <div id="platformChart" style="min-height: 350px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Activities -->
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">Aktivitas User Terbaru</h5>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Target</th>
+                        <th>Waktu</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for activity in recent_activities %}
+                      <tr>
+                        <td>{{ activity.user.username|default:"System" }}</td>
+                        <td>
+                          <span class="badge bg-label-primary">{{ activity.get_action_display }}</span>
+                        </td>
+                        <td>{{ activity.target_name|default:"-" }}</td>
+                        <td>{{ activity.created_at|date:"d M Y H:i" }}</td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                        <td colspan="4" class="text-center">Tidak ada aktivitas</td>
+                      </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+{% block page_js %}
+<script>
+  'use strict';
+
+  // Wait for ApexCharts to be loaded and prevent double initialization
+  var dashboardChartsInitialized = false;
+  
+  function initCharts() {
+    // Prevent double initialization
+    if (dashboardChartsInitialized) {
+      console.log('Charts already initialized, skipping...');
+      return;
+    }
+    
+    if (typeof ApexCharts === 'undefined') {
+      console.warn('ApexCharts not loaded yet, retrying...');
+      setTimeout(initCharts, 100);
+      return;
+    }
+    
+    dashboardChartsInitialized = true;
+
+  // Parse data from context
+  let trendData = { dates: [], views: [], engagement: [], reach: [] };
+  let platformData = { labels: ['Instagram', 'TikTok', 'Facebook', 'YouTube'], story_count: [0, 0, 0, 0], feed_count: [0, 0, 0, 0] };
+  let statusData = { labels: ['Draft', 'Published', 'Scheduled', 'Archived'], values: [0, 0, 0, 0] };
+
+  try {
+    {% if trend_data %}
+    const trendDataStr = {{ trend_data|safe }};
+    if (trendDataStr && typeof trendDataStr === 'string' && trendDataStr.trim() !== '' && trendDataStr !== '{}') {
+      trendData = JSON.parse(trendDataStr);
+    } else if (typeof trendDataStr === 'object' && trendDataStr !== null) {
+      trendData = trendDataStr;
+    }
+    {% endif %}
+  } catch(e) {
+    console.error('Error parsing trendData:', e);
+    trendData = { dates: [], views: [], engagement: [], reach: [] };
+  }
+
+  try {
+    {% if platform_data %}
+    const platformDataStr = {{ platform_data|safe }};
+    if (platformDataStr && typeof platformDataStr === 'string' && platformDataStr.trim() !== '' && platformDataStr !== '{}') {
+      platformData = JSON.parse(platformDataStr);
+    } else if (typeof platformDataStr === 'object' && platformDataStr !== null) {
+      platformData = platformDataStr;
+    }
+    {% endif %}
+  } catch(e) {
+    console.error('Error parsing platformData:', e);
+    platformData = { labels: ['Instagram', 'TikTok', 'Facebook', 'YouTube'], story_count: [0, 0, 0, 0], feed_count: [0, 0, 0, 0] };
+  }
+
+  try {
+    {% if status_data %}
+    const statusDataStr = {{ status_data|safe }};
+    if (statusDataStr && typeof statusDataStr === 'string' && statusDataStr.trim() !== '' && statusDataStr !== '{}') {
+      statusData = JSON.parse(statusDataStr);
+    } else if (typeof statusDataStr === 'object' && statusDataStr !== null) {
+      statusData = statusDataStr;
+    }
+    {% endif %}
+  } catch(e) {
+    console.error('Error parsing statusData:', e);
+    statusData = { labels: ['Draft', 'Published', 'Scheduled', 'Archived'], values: [0, 0, 0, 0] };
+  }
+
+  // Trend Chart - Line Chart
+  const trendChartEl = document.querySelector('#trendChart');
+  if (trendChartEl && typeof ApexCharts !== 'undefined') {
+    // Ensure data exists with default values
+    if (!trendData.dates || trendData.dates.length === 0) {
+      // Create default dates for last 7 days
+      const dates = [];
+      for (let i = 6; i >= 0; i--) {
+        const date = new Date();
+        date.setDate(date.getDate() - i);
+        dates.push(date.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }));
+      }
+      trendData = { dates: dates, views: new Array(7).fill(0), engagement: new Array(7).fill(0), reach: new Array(7).fill(0) };
+    }
+    const trendChartConfig = {
+      chart: {
+        height: 300,
+        type: 'line',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Views',
+          data: trendData.views || []
+        },
+        {
+          name: 'Engagement Rate (%)',
+          data: trendData.engagement || []
+        },
+        {
+          name: 'Reach',
+          data: trendData.reach || []
+        }
+      ],
+      xaxis: {
+        categories: trendData.dates || []
+      },
+      colors: ['#696cff', '#71dd37', '#ffab00'],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      markers: {
+        size: 4
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      }
+    };
+    window.trendChart = new ApexCharts(trendChartEl, trendChartConfig);
+    window.trendChart.render();
+    console.log('✅ Trend Chart rendered successfully');
+  }
+
+  // Status Chart - Pie Chart
+  const statusChartEl = document.querySelector('#statusChart');
+  if (statusChartEl && typeof ApexCharts !== 'undefined') {
+    // Ensure data exists
+    if (!statusData.labels || statusData.labels.length === 0) {
+      statusData = { labels: ['Draft', 'Published', 'Scheduled', 'Archived'], values: [0, 0, 0, 0] };
+    }
+    const statusChartConfig = {
+      chart: {
+        height: 300,
+        type: 'donut'
+      },
+      labels: statusData.labels || [],
+      series: statusData.values || [],
+      colors: ['#696cff', '#71dd37', '#ffab00', '#ff3e1d'],
+      legend: {
+        show: true,
+        position: 'bottom'
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function(val) {
+          return val.toFixed(1) + '%';
+        }
+      }
+    };
+    window.statusChart = new ApexCharts(statusChartEl, statusChartConfig);
+    window.statusChart.render();
+    console.log('✅ Status Chart rendered successfully');
+  }
+
+  // Platform Chart - Bar Chart
+  const platformChartEl = document.querySelector('#platformChart');
+  if (platformChartEl && typeof ApexCharts !== 'undefined') {
+    // Ensure data exists
+    if (!platformData.labels || platformData.labels.length === 0) {
+      platformData = { labels: ['Instagram', 'TikTok', 'Facebook', 'YouTube'], story_count: [0, 0, 0, 0], feed_count: [0, 0, 0, 0] };
+    }
+    const platformChartConfig = {
+      chart: {
+        height: 350,
+        type: 'bar',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Story',
+          data: platformData.story_count || []
+        },
+        {
+          name: 'Feed/Reels',
+          data: platformData.feed_count || []
+        }
+      ],
+      xaxis: {
+        categories: platformData.labels || []
+      },
+      colors: ['#696cff', '#71dd37'],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '55%',
+          endingShape: 'rounded'
+        }
+      },
+      dataLabels: {
+        enabled: true
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      }
+    };
+    window.platformChart = new ApexCharts(platformChartEl, platformChartConfig);
+    window.platformChart.render();
+    console.log('✅ Platform Chart rendered successfully');
+  }
+  }
+
+  // Real-time update function untuk Dashboard Management
+  function updateDashboardCharts() {
+    const companyFilter = document.querySelector('[name="company"]')?.value || '';
+    const accountFilter = document.querySelector('[name="account_name"]')?.value || '';
+    const params = new URLSearchParams();
+    if (companyFilter) params.append('company', companyFilter);
+    if (accountFilter) params.append('account_name', accountFilter);
+    
+    fetch('{% url "kpi_management:dashboard-charts-api" %}?' + params.toString())
+      .then(response => response.json())
+      .then(data => {
+        if (data.success && window.trendChart && window.statusChart && window.platformChart) {
+          // Update Trend Chart
+          window.trendChart.updateSeries([
+            { name: 'Views', data: data.trend_data.views || [] },
+            { name: 'Engagement Rate (%)', data: data.trend_data.engagement || [] },
+            { name: 'Reach', data: data.trend_data.reach || [] }
+          ]);
+          window.trendChart.updateOptions({
+            xaxis: { categories: data.trend_data.dates || [] }
+          });
+
+          // Update Status Chart
+          window.statusChart.updateSeries(data.status_data.values || []);
+
+          // Update Platform Chart
+          window.platformChart.updateSeries([
+            { name: 'Story', data: data.platform_data.story_count || [] },
+            { name: 'Feed/Reels', data: data.platform_data.feed_count || [] }
+          ]);
+          window.platformChart.updateOptions({
+            xaxis: { categories: data.platform_data.labels || [] }
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error updating dashboard charts:', error);
+      });
+  }
+
+  // Initialize charts when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCharts);
+  } else {
+    initCharts();
+  }
+
+  // Start real-time updates every 30 seconds after charts are rendered
+  setTimeout(() => {
+    if (window.trendChart && window.statusChart && window.platformChart) {
+      setInterval(updateDashboardCharts, 30000);
+      console.log('✅ Real-time updates enabled for Dashboard Management charts');
+    }
+  }, 2000);
+</script>
+{% endblock page_js %}

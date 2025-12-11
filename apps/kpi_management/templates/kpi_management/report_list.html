@@ -1,0 +1,132 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Report Management{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Report Management</h5>
+        <a href="{% url 'kpi_management:report-create' %}" class="btn btn-primary">
+          <i class="icon-base bx bx-plus me-1"></i>
+          Buat Report
+        </a>
+      </div>
+      <div class="card-body">
+        <!-- Search and Filter -->
+        <form method="get" class="mb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <input type="text" name="search" class="form-control" placeholder="Cari report..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+              <select name="report_type" class="form-select">
+                <option value="">Semua Tipe</option>
+                <option value="campaign_summary" {% if request.GET.report_type == 'campaign_summary' %}selected{% endif %}>Campaign Summary</option>
+                <option value="posting_insight" {% if request.GET.report_type == 'posting_insight' %}selected{% endif %}>Posting Insight</option>
+                <option value="collaboration" {% if request.GET.report_type == 'collaboration' %}selected{% endif %}>Collaboration</option>
+                <option value="viral_fyp" {% if request.GET.report_type == 'viral_fyp' %}selected{% endif %}>Viral FYP</option>
+                <option value="user_activity" {% if request.GET.report_type == 'user_activity' %}selected{% endif %}>User Activity</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+          </div>
+        </form>
+
+        <!-- Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Tipe Report</th>
+                <th>Period</th>
+                <th>Tanggal Dibuat</th>
+                <th>Auto Generate</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for report in reports %}
+              <tr>
+                <td><strong>{{ report.title }}</strong></td>
+                <td>
+                  <span class="badge bg-label-info">{{ report.get_report_type_display }}</span>
+                </td>
+                <td>{{ report.get_period_display }}</td>
+                <td>{{ report.created_at|date:"d M Y" }}</td>
+                <td>
+                  {% if report.auto_generate %}
+                    <span class="badge bg-label-success">Yes</span>
+                  {% else %}
+                    <span class="badge bg-label-secondary">No</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                      <i class="icon-base bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="{% url 'kpi_management:report-detail' report.pk %}">
+                        <i class="icon-base bx bx-show me-1"></i> Detail
+                      </a>
+                      {% if report.pdf_file %}
+                      <a class="dropdown-item" href="{% url 'kpi_management:report-export-pdf' report.pk %}">
+                        <i class="icon-base bx bx-file me-1"></i> Export PDF
+                      </a>
+                      {% endif %}
+                      {% if report.excel_file %}
+                      <a class="dropdown-item" href="{% url 'kpi_management:report-export-excel' report.pk %}">
+                        <i class="icon-base bx bx-spreadsheet me-1"></i> Export Excel
+                      </a>
+                      {% endif %}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="6" class="text-center">Tidak ada data report</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item active">
+              <span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

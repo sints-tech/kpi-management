@@ -1,0 +1,86 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Pengaturan Bahasa{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Pengaturan Bahasa</h5>
+        <a href="{% url 'kpi_management:settings-list' %}" class="btn btn-label-secondary">
+          <i class="icon-base bx bx-arrow-back me-1"></i> Kembali
+        </a>
+      </div>
+      <div class="card-body">
+        <form method="post" id="languageForm">
+          {% csrf_token %}
+
+          <div class="row">
+            <div class="col-12 mb-4">
+              <h6 class="mb-3">Pilih Bahasa</h6>
+              <p class="text-muted">Pilih bahasa yang akan digunakan untuk antarmuka aplikasi.</p>
+            </div>
+          </div>
+
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <label for="language" class="form-label">Bahasa Sistem <span class="text-danger">*</span></label>
+              <select name="language" id="language" class="form-select" required>
+                {% for lang_code, lang_name in available_languages %}
+                  <option value="{{ lang_code }}" {% if current_language == lang_code %}selected{% endif %}>
+                    {{ lang_name }}
+                  </option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Bahasa yang dipilih akan diterapkan pada seluruh antarmuka aplikasi.</div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-12">
+              <div class="alert alert-info">
+                <i class="icon-base bx bx-info-circle me-2"></i>
+                <strong>Catatan:</strong> Perubahan bahasa akan diterapkan setelah menyimpan dan me-refresh halaman.
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="{% url 'kpi_management:settings-list' %}" class="btn btn-label-secondary">
+              <i class="icon-base bx bx-x me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="icon-base bx bx-save me-1"></i> Simpan Perubahan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  'use strict';
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Optional: Add language preview
+    const languageSelect = document.getElementById('language');
+    if (languageSelect) {
+      languageSelect.addEventListener('change', function() {
+        // You can add preview functionality here
+        console.log('Language selected:', this.value);
+      });
+    }
+  });
+</script>
+{% endblock page_js %}
+

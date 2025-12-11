@@ -1,0 +1,315 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title|default:"Form Akun Sosial Media" }}{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">{{ title|default:"Form Akun Sosial Media" }}</h5>
+      </div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Informasi Platform -->
+          <h6 class="mb-3">Informasi Platform</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.platform.label }} <span class="text-danger">*</span></label>
+              {{ form.platform }}
+              {% if form.platform.errors %}
+                <div class="text-danger small">{{ form.platform.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.account_name.label }} <span class="text-danger">*</span></label>
+              {{ form.account_name }}
+              {% if form.account_name.errors %}
+                <div class="text-danger small">{{ form.account_name.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.account_id.label }}</label>
+              {{ form.account_id }}
+              {% if form.account_id.errors %}
+                <div class="text-danger small">{{ form.account_id.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.display_name.label }}</label>
+              {{ form.display_name }}
+              {% if form.display_name.errors %}
+                <div class="text-danger small">{{ form.display_name.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-12">
+              <label class="form-label">{{ form.profile_url.label }}</label>
+              <div class="input-group">
+                {{ form.profile_url }}
+                {% if form.profile_url.value %}
+                <a href="{{ form.profile_url.value }}" target="_blank" class="btn btn-outline-primary" type="button">
+                  <i class="bx bx-link-external"></i> Kunjungi
+                </a>
+                {% endif %}
+              </div>
+              {% if form.profile_url.errors %}
+                <div class="text-danger small">{{ form.profile_url.errors }}</div>
+              {% endif %}
+              <small class="text-muted">Masukkan URL profil akun sosial media (opsional)</small>
+            </div>
+          </div>
+
+          <!-- Informasi Pemilik -->
+          <h6 class="mb-3 mt-4">Informasi Pemilik</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.owner.label }}</label>
+              {{ form.owner }}
+              {% if form.owner.errors %}
+                <div class="text-danger small">{{ form.owner.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.profile.label }}</label>
+              {{ form.profile }}
+              {% if form.profile.errors %}
+                <div class="text-danger small">{{ form.profile.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Metode Input -->
+          <h6 class="mb-3 mt-4">Metode Input Data</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.input_method.label }} <span class="text-danger">*</span></label>
+              {{ form.input_method }}
+              {% if form.input_method.errors %}
+                <div class="text-danger small">{{ form.input_method.errors }}</div>
+              {% endif %}
+              <div class="form-text">Pilih metode input: Manual (input sendiri) atau API/Token Sync (sinkronisasi otomatis)</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.status.label }} <span class="text-danger">*</span></label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div class="text-danger small">{{ form.status.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Status & Pengaturan -->
+          <h6 class="mb-3 mt-4">Status & Pengaturan</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                {{ form.is_verified }}
+                <label class="form-check-label" for="{{ form.is_verified.id_for_label }}">
+                  {{ form.is_verified.label }}
+                </label>
+              </div>
+              <div class="form-check form-switch mt-2">
+                {{ form.is_business_account }}
+                <label class="form-check-label" for="{{ form.is_business_account.id_for_label }}">
+                  {{ form.is_business_account.label }}
+                </label>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.company.label }}</label>
+              {{ form.company }}
+              {% if form.company.errors %}
+                <div class="text-danger small">{{ form.company.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Statistik Akun -->
+          <h6 class="mb-3 mt-4">Statistik Akun</h6>
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <label class="form-label">{{ form.followers_count.label }}</label>
+              {{ form.followers_count }}
+              {% if form.followers_count.errors %}
+                <div class="text-danger small">{{ form.followers_count.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">{{ form.following_count.label }}</label>
+              {{ form.following_count }}
+              {% if form.following_count.errors %}
+                <div class="text-danger small">{{ form.following_count.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">{{ form.posts_count.label }}</label>
+              {{ form.posts_count }}
+              {% if form.posts_count.errors %}
+                <div class="text-danger small">{{ form.posts_count.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">{{ form.engagement_rate.label }} (%)</label>
+              {{ form.engagement_rate }}
+              {% if form.engagement_rate.errors %}
+                <div class="text-danger small">{{ form.engagement_rate.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Kredensial & Akses API (Untuk API Sync) -->
+          <div id="apiFieldsSection" style="display: none;">
+            <h6 class="mb-3 mt-4">Kredensial & Akses API <small class="text-muted">(Diperlukan untuk API Sync)</small></h6>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-check form-switch mb-3">
+                  {{ form.auto_sync_enabled }}
+                  <label class="form-check-label" for="{{ form.auto_sync_enabled.id_for_label }}">
+                    {{ form.auto_sync_enabled.label }}
+                  </label>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.sync_schedule.label }}</label>
+                {{ form.sync_schedule }}
+                {% if form.sync_schedule.errors %}
+                  <div class="text-danger small">{{ form.sync_schedule.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.access_token.label }} <span class="text-danger" id="accessTokenRequired" style="display: none;">*</span></label>
+                {{ form.access_token }}
+                {% if form.access_token.errors %}
+                  <div class="text-danger small">{{ form.access_token.errors }}</div>
+                {% endif %}
+                <div class="form-text">Diperlukan untuk API Sync (Instagram Graph API, Facebook API, dll)</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.refresh_token.label }}</label>
+                {{ form.refresh_token }}
+                {% if form.refresh_token.errors %}
+                  <div class="text-danger small">{{ form.refresh_token.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">{{ form.api_key.label }}</label>
+                {{ form.api_key }}
+                {% if form.api_key.errors %}
+                  <div class="text-danger small">{{ form.api_key.errors }}</div>
+                {% endif %}
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">{{ form.api_secret.label }}</label>
+                {{ form.api_secret }}
+                {% if form.api_secret.errors %}
+                  <div class="text-danger small">{{ form.api_secret.errors }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Metadata -->
+          <h6 class="mb-3 mt-4">Metadata</h6>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.connected_at.label }}</label>
+              {{ form.connected_at }}
+              {% if form.connected_at.errors %}
+                <div class="text-danger small">{{ form.connected_at.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.last_synced_at.label }}</label>
+              {{ form.last_synced_at }}
+              {% if form.last_synced_at.errors %}
+                <div class="text-danger small">{{ form.last_synced_at.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.notes.label }}</label>
+              {{ form.notes }}
+              {% if form.notes.errors %}
+                <div class="text-danger small">{{ form.notes.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tags</label>
+              {{ form.tags }}
+              {% if form.tags.errors %}
+                <div class="text-danger small">{{ form.tags.errors }}</div>
+              {% endif %}
+              <div class="form-text">Pisahkan dengan koma (contoh: marketing, social, influencer)</div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 mt-4">
+            <a href="{% url 'kpi_management:socialmediaaccount-list' %}" class="btn btn-label-secondary">
+              <i class="icon-base bx bx-x me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="icon-base bx bx-save me-1"></i> Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const inputMethodField = document.getElementById('{{ form.input_method.id_for_label }}');
+  const apiFieldsSection = document.getElementById('apiFieldsSection');
+  const accessTokenRequired = document.getElementById('accessTokenRequired');
+  const accountIdField = document.getElementById('{{ form.account_id.id_for_label }}');
+  
+  function toggleApiFields() {
+    const inputMethod = inputMethodField.value;
+    if (inputMethod === 'api') {
+      apiFieldsSection.style.display = 'block';
+      accessTokenRequired.style.display = 'inline';
+      if (accountIdField) {
+        accountIdField.required = true;
+      }
+    } else {
+      apiFieldsSection.style.display = 'none';
+      accessTokenRequired.style.display = 'none';
+      if (accountIdField) {
+        accountIdField.required = false;
+      }
+    }
+  }
+  
+  // Initial state
+  toggleApiFields();
+  
+  // Listen for changes
+  if (inputMethodField) {
+    inputMethodField.addEventListener('change', toggleApiFields);
+  }
+});
+</script>
+{% endblock %}
+

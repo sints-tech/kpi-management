@@ -1,0 +1,136 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title|default:"Form Pengaturan" }}{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">{{ title|default:"Form Pengaturan" }}</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.name.label }} <span class="text-danger">*</span></label>
+              {{ form.name }}
+              {% if form.name.errors %}
+                <div class="text-danger small">{{ form.name.errors }}</div>
+              {% endif %}
+              {% if form.name.help_text %}
+                <div class="form-text">{{ form.name.help_text }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.label.label }} <span class="text-danger">*</span></label>
+              {{ form.label }}
+              {% if form.label.errors %}
+                <div class="text-danger small">{{ form.label.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.setting_type.label }} <span class="text-danger">*</span></label>
+              {{ form.setting_type }}
+              {% if form.setting_type.errors %}
+                <div class="text-danger small">{{ form.setting_type.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.value_type.label }} <span class="text-danger">*</span></label>
+              {{ form.value_type }}
+              {% if form.value_type.errors %}
+                <div class="text-danger small">{{ form.value_type.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-12">
+              <label class="form-label">{{ form.value.label }}</label>
+              {{ form.value }}
+              {% if form.value.errors %}
+                <div class="text-danger small">{{ form.value.errors }}</div>
+              {% endif %}
+              {% if form.value.help_text %}
+                <div class="form-text">
+                  <small>
+                    {% if form.value_type.value == 'boolean' %}
+                      Gunakan: true, false, 1, 0, yes, no, on, off
+                    {% elif form.value_type.value == 'number' %}
+                      Masukkan angka (integer atau decimal)
+                    {% elif form.value_type.value == 'json' %}
+                      Masukkan JSON yang valid, contoh: {"key": "value"}
+                    {% elif form.value_type.value == 'email' %}
+                      Masukkan alamat email yang valid
+                    {% elif form.value_type.value == 'url' %}
+                      Masukkan URL yang valid (dengan http:// atau https://)
+                    {% endif %}
+                  </small>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-12">
+              <label class="form-label">{{ form.description.label }}</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="text-danger small">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                {{ form.is_active }}
+                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                  {{ form.is_active.label }}
+                </label>
+              </div>
+              {% if form.is_active.errors %}
+                <div class="text-danger small">{{ form.is_active.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                {{ form.is_public }}
+                <label class="form-check-label" for="{{ form.is_public.id_for_label }}">
+                  {{ form.is_public.label }}
+                </label>
+              </div>
+              {% if form.is_public.errors %}
+                <div class="text-danger small">{{ form.is_public.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'kpi_management:settings-list' %}" class="btn btn-label-secondary">
+              <i class="icon-base bx bx-x me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="icon-base bx bx-save me-1"></i> Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

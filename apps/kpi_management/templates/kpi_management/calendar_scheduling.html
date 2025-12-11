@@ -1,0 +1,76 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Calendar Scheduling{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Calendar Scheduling</h5>
+        <a href="{% url 'kpi_management:dailyfeedreels-create' %}" class="btn btn-primary">
+          <i class="icon-base bx bx-plus me-1"></i>
+          Tambah Feed/Reels
+        </a>
+      </div>
+      <div class="card-body">
+        <div id="calendar"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FullCalendar CSS -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet" />
+
+<!-- FullCalendar JS -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('calendar');
+  var calendarEvents = [];
+  try {
+    calendarEvents = {{ calendar_events|safe }};
+  } catch(e) {
+    console.error('Error parsing calendar events:', e);
+    calendarEvents = [];
+  }
+
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth',
+    locale: 'id',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+    },
+    events: (calendarEvents || []).map(function(event) {
+      return {
+        title: event.title || 'Untitled',
+        start: event.start || new Date().toISOString(),
+        url: event.url || '#',
+        backgroundColor: event.status === 'scheduled' ? '#696cff' : '#8592a3',
+        borderColor: event.status === 'scheduled' ? '#696cff' : '#8592a3'
+      };
+    }),
+    eventClick: function(info) {
+      if (info.event.url) {
+        window.location.href = info.event.url;
+        return false;
+      }
+    }
+  });
+
+  calendar.render();
+});
+</script>
+{% endblock %}
+
+

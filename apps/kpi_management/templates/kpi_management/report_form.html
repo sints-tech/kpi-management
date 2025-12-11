@@ -1,0 +1,119 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}{{ title|default:"Form Report" }}{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">{{ title|default:"Form Report" }}</h5>
+      </div>
+      <div class="card-body">
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.title.label }} <span class="text-danger">*</span></label>
+              {{ form.title }}
+              {% if form.title.errors %}
+                <div class="text-danger small">{{ form.title.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.report_type.label }} <span class="text-danger">*</span></label>
+              {{ form.report_type }}
+              {% if form.report_type.errors %}
+                <div class="text-danger small">{{ form.report_type.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.period.label }} <span class="text-danger">*</span></label>
+              {{ form.period }}
+              {% if form.period.errors %}
+                <div class="text-danger small">{{ form.period.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.performance_type.label }}</label>
+              {{ form.performance_type }}
+              {% if form.performance_type.errors %}
+                <div class="text-danger small">{{ form.performance_type.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.campaign_filter.label }}</label>
+              {{ form.campaign_filter }}
+              {% if form.campaign_filter.errors %}
+                <div class="text-danger small">{{ form.campaign_filter.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.brand_filter.label }}</label>
+              {{ form.brand_filter }}
+              {% if form.brand_filter.errors %}
+                <div class="text-danger small">{{ form.brand_filter.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.start_date.label }}</label>
+              {{ form.start_date }}
+              {% if form.start_date.errors %}
+                <div class="text-danger small">{{ form.start_date.errors }}</div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">{{ form.end_date.label }}</label>
+              {{ form.end_date }}
+              {% if form.end_date.errors %}
+                <div class="text-danger small">{{ form.end_date.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                {{ form.auto_generate }}
+                <label class="form-check-label" for="{{ form.auto_generate.id_for_label }}">
+                  {{ form.auto_generate.label }}
+                </label>
+              </div>
+              {% if form.auto_generate.errors %}
+                <div class="text-danger small">{{ form.auto_generate.errors }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'kpi_management:report-list' %}" class="btn btn-label-secondary">
+              <i class="icon-base bx bx-x me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-primary">
+              <i class="icon-base bx bx-save me-1"></i> Simpan
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

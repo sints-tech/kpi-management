@@ -1,0 +1,119 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+
+{% block title %}Detail Story{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Detail Story</h5>
+        <div>
+          <a href="{% url 'kpi_management:story-update' story.pk %}" class="btn btn-primary">
+            <i class="icon-base bx bx-edit me-1"></i> Edit
+          </a>
+          <a href="{% url 'kpi_management:story-list' %}" class="btn btn-label-secondary">
+            <i class="icon-base bx bx-arrow-back me-1"></i> Kembali
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6>Judul</h6>
+            <p>{{ story.title }}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Platform</h6>
+            <p><span class="badge bg-label-info">{{ story.get_platform_display }}</span></p>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6>Nama Akun</h6>
+            <p>{{ story.account_name }}</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Tanggal Story</h6>
+            <p>{{ story.story_date|date:"d F Y" }}</p>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-3">
+            <h6>Views</h6>
+            <p class="fs-4">{{ story.views|default:0 }}</p>
+          </div>
+          <div class="col-md-3">
+            <h6>Impressions</h6>
+            <p class="fs-4">{{ story.impressions|default:0 }}</p>
+          </div>
+          <div class="col-md-3">
+            <h6>Reach</h6>
+            <p class="fs-4">{{ story.reach|default:0 }}</p>
+          </div>
+          <div class="col-md-3">
+            <h6>Link Clicks</h6>
+            <p class="fs-4">{{ story.link_clicks|default:0 }}</p>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6>Engagement Rate</h6>
+            <p class="fs-4">{{ story.engagement_rate|floatformat:2 }}%</p>
+          </div>
+          <div class="col-md-6">
+            <h6>Status</h6>
+            <p>
+              {% if story.status == 'published' %}
+                <span class="badge bg-label-success">Published</span>
+              {% elif story.status == 'draft' %}
+                <span class="badge bg-label-warning">Draft</span>
+              {% else %}
+                <span class="badge bg-label-secondary">Archived</span>
+              {% endif %}
+            </p>
+          </div>
+        </div>
+
+        {% if story.content_url %}
+        <div class="mb-4">
+          <h6>URL Konten</h6>
+          <p>
+            <a href="{{ story.content_url }}" target="_blank" class="btn btn-outline-primary">
+              <i class="icon-base bx bx-link-external me-1"></i> Kunjungi Konten
+            </a>
+          </p>
+        </div>
+        {% endif %}
+
+        {% if story.notes %}
+        <div class="mb-4">
+          <h6>Catatan</h6>
+          <p>{{ story.notes }}</p>
+        </div>
+        {% endif %}
+
+        <div class="row">
+          <div class="col-md-6">
+            <small class="text-muted">Dibuat oleh: {{ story.created_by|default:"-" }} pada {{ story.created_at|date:"d M Y H:i" }}</small>
+          </div>
+          <div class="col-md-6 text-end">
+            <small class="text-muted">Terakhir diupdate: {{ story.updated_at|date:"d M Y H:i" }}</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

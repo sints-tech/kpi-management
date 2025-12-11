@@ -1,0 +1,40 @@
+{% extends layout_path %}{% load static %}{% block title %}{{ title|default:"FYP Post Value Form" }}{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row"><div class="col-12"><div class="card">
+  <div class="card-header"><h5 class="mb-0">{{ title|default:"FYP Post Value Form" }}</h5></div>
+  <div class="card-body"><form method="post">{% csrf_token %}
+    <div class="row mb-3"><div class="col-md-6"><label class="form-label">{{ form.post_title.label }}</label>{{ form.post_title }}{% if form.post_title.errors %}<div class="text-danger">{{ form.post_title.errors }}</div>{% endif %}</div>
+    <div class="col-md-6"><label class="form-label">{{ form.platform.label }}</label>{{ form.platform }}{% if form.platform.errors %}<div class="text-danger">{{ form.platform.errors }}</div>{% endif %}</div></div>
+    <div class="row mb-3"><div class="col-md-6"><label class="form-label">{{ form.account_name.label }}</label>{{ form.account_name }}{% if form.account_name.errors %}<div class="text-danger">{{ form.account_name.errors }}</div>{% endif %}</div>
+    <div class="col-md-6">
+      <label class="form-label">{{ form.post_url.label }}</label>
+      <div class="input-group">
+        {{ form.post_url }}
+        {% if form.post_url.value %}
+        <a href="{{ form.post_url.value }}" target="_blank" class="btn btn-outline-primary" type="button">
+          <i class="bx bx-link-external"></i> Kunjungi
+        </a>
+        {% endif %}
+      </div>
+      {% if form.post_url.errors %}<div class="text-danger">{{ form.post_url.errors }}</div>{% endif %}
+      <small class="text-muted">Masukkan URL tautan post (opsional)</small>
+    </div></div>
+    <div class="row mb-3"><div class="col-md-4"><label class="form-label">{{ form.fyp_views.label }}</label>{{ form.fyp_views }}{% if form.fyp_views.errors %}<div class="text-danger">{{ form.fyp_views.errors }}</div>{% endif %}</div>
+    <div class="col-md-4"><label class="form-label">{{ form.total_views.label }}</label>{{ form.total_views }}{% if form.total_views.errors %}<div class="text-danger">{{ form.total_views.errors }}</div>{% endif %}</div>
+    <div class="col-md-4"><label class="form-label">{{ form.fyp_percentage.label }}</label>{{ form.fyp_percentage }}{% if form.fyp_percentage.errors %}<div class="text-danger">{{ form.fyp_percentage.errors }}</div>{% endif %}</div></div>
+    <div class="row mb-3"><div class="col-md-4"><label class="form-label">{{ form.engagement_value.label }}</label>{{ form.engagement_value }}{% if form.engagement_value.errors %}<div class="text-danger">{{ form.engagement_value.errors }}</div>{% endif %}</div>
+    <div class="col-md-4"><label class="form-label">{{ form.estimated_reach.label }}</label>{{ form.estimated_reach }}{% if form.estimated_reach.errors %}<div class="text-danger">{{ form.estimated_reach.errors }}</div>{% endif %}</div>
+    <div class="col-md-4"><label class="form-label">{{ form.viral_score.label }}</label>{{ form.viral_score }}{% if form.viral_score.errors %}<div class="text-danger">{{ form.viral_score.errors }}</div>{% endif %}</div></div>
+    <div class="row mb-3"><div class="col-md-6"><label class="form-label">{{ form.post_date.label }}</label>{{ form.post_date }}{% if form.post_date.errors %}<div class="text-danger">{{ form.post_date.errors }}</div>{% endif %}</div></div>
+    <div class="mb-3"><label class="form-label">{{ form.notes.label }}</label>{{ form.notes }}{% if form.notes.errors %}<div class="text-danger">{{ form.notes.errors }}</div>{% endif %}</div>
+    <div class="d-flex justify-content-end gap-2"><a href="{% url 'kpi_management:fyppostvalue-list' %}" class="btn btn-label-secondary">Batal</a>
+    <button type="submit" class="btn btn-primary">Simpan</button></div>
+  </form></div>
+</div></div></div>
+{% endblock %}
+

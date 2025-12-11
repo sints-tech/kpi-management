@@ -1,0 +1,1214 @@
+{% extends layout_path %}
+
+{% load static %}
+{% load i18n %}
+{% load theme %}
+
+{% block title %}Dashboard - KPI Management{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+<style>
+  /* Additional Dark Mode Styling for Dashboard KPI */
+  [data-bs-theme="dark"] .card-title.text-primary {
+    color: #696cff !important;
+  }
+
+  [data-bs-theme="dark"] .avatar-initial {
+    color: #FFFFFF !important;
+  }
+
+  [data-bs-theme="dark"] .nav-link {
+    color: #E4E6EB !important;
+  }
+
+  [data-bs-theme="dark"] .nav-link.active {
+    background-color: #696cff !important;
+    color: #FFFFFF !important;
+  }
+
+  [data-bs-theme="dark"] .nav-link:hover:not(.active) {
+    background-color: #2F3142 !important;
+    color: #FFFFFF !important;
+  }
+
+  [data-bs-theme="dark"] .btn-outline-primary {
+    border-color: #696cff !important;
+    color: #696cff !important;
+  }
+
+  [data-bs-theme="dark"] .btn-outline-primary:hover {
+    background-color: #696cff !important;
+    border-color: #696cff !important;
+    color: #FFFFFF !important;
+  }
+
+  [data-bs-theme="dark"] .text-body-secondary {
+    color: #A7ACB2 !important;
+  }
+
+  [data-bs-theme="dark"] .small {
+    color: #A7ACB2 !important;
+  }
+
+  [data-bs-theme="dark"] .text-success {
+    color: #71dd37 !important;
+  }
+
+  [data-bs-theme="dark"] .card-subtitle {
+    color: #A7ACB2 !important;
+  }
+
+  [data-bs-theme="dark"] .user-progress h6 {
+    color: #E4E6EB !important;
+  }
+
+  [data-bs-theme="dark"] .user-progress small {
+    color: #A7ACB2 !important;
+  }
+
+  /* Welcome Card Specific Dark Mode */
+  [data-bs-theme="dark"] .card .card-body p {
+    color: #E4E6EB !important;
+  }
+
+  /* Chart Container Dark Mode */
+  [data-bs-theme="dark"] #totalRevenueChart,
+  [data-bs-theme="dark"] #growthChart,
+  [data-bs-theme="dark"] #profileReportChart,
+  [data-bs-theme="dark"] #orderStatisticsChart,
+  [data-bs-theme="dark"] #incomeChart,
+  [data-bs-theme="dark"] #engagementChart,
+  [data-bs-theme="dark"] #reachChart,
+  [data-bs-theme="dark"] #expensesOfWeek,
+  [data-bs-theme="dark"] #platformChart {
+    background-color: transparent !important;
+  }
+
+  /* ApexCharts Tooltip Dark Mode */
+  [data-bs-theme="dark"] .apexcharts-tooltip {
+    background-color: #2F3142 !important;
+    border-color: #3A3D4F !important;
+    color: #E4E6EB !important;
+  }
+
+  [data-bs-theme="dark"] .apexcharts-tooltip-title {
+    background-color: #282A3A !important;
+    border-bottom-color: #3A3D4F !important;
+    color: #FFFFFF !important;
+  }
+
+  [data-bs-theme="dark"] .apexcharts-legend-text {
+    color: #E4E6EB !important;
+  }
+
+  [data-bs-theme="dark"] .apexcharts-xaxis-texts-g text,
+  [data-bs-theme="dark"] .apexcharts-yaxis-texts-g text {
+    fill: #A7ACB2 !important;
+  }
+</style>
+{% endblock page_css %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}"/>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block content %}
+<div class="row">
+  <!-- Welcome Card -->
+  <div class="col-xxl-8 mb-6 order-0">
+    <div class="card">
+      <div class="d-flex align-items-start row">
+        <div class="col-sm-7">
+          <div class="card-body">
+            <h5 class="card-title text-primary mb-3">Selamat Datang di KPI Management System! 🎉</h5>
+            <p class="mb-6">Sistem manajemen KPI untuk tim kreatif. Kelola insight, konten, campaign, dan kolaborasi brand dengan mudah.</p>
+            <a href="{% url 'kpi_management:dashboard-management' %}" class="btn btn-sm btn-outline-primary">Lihat Dashboard Detail</a>
+          </div>
+        </div>
+        <div class="col-sm-5 text-center text-sm-left">
+          <div class="card-body pb-0 px-0 px-md-6">
+            <img src="{% static 'img/illustrations/man-with-laptop.png' %}" height="175" alt="KPI Management" class="img-fluid"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="col-xxl-4 col-lg-12 col-md-4 order-1">
+    <div class="row">
+      <div class="col-lg-6 col-md-12 col-6 mb-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="card-title d-flex align-items-start justify-content-between mb-4">
+              <div class="avatar flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-success">
+                  <i class="icon-base bx bx-book-content icon-lg"></i>
+                </span>
+              </div>
+              <div class="dropdown">
+                <button class="btn p-0" type="button" id="cardOptStory" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="icon-base bx bx-dots-vertical-rounded text-body-secondary"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOptStory">
+                  <a class="dropdown-item" href="{% url 'kpi_management:story-list' %}">View More</a>
+                </div>
+              </div>
+            </div>
+            <p class="mb-1">Total Story</p>
+            <h4 class="card-title mb-3">{{ total_stories|default:0 }}</h4>
+            <small class="text-success fw-medium">
+              <i class="icon-base bx bx-up-arrow-alt"></i>
+              {{ engagement_avg|default:0|floatformat:1 }}% Engagement
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 col-md-12 col-6 mb-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="card-title d-flex align-items-start justify-content-between mb-4">
+              <div class="avatar flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-info">
+                  <i class="icon-base bx bx-video icon-lg"></i>
+                </span>
+              </div>
+              <div class="dropdown">
+                <button class="btn p-0" type="button" id="cardOptFeed" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="icon-base bx bx-dots-vertical-rounded text-body-secondary"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOptFeed">
+                  <a class="dropdown-item" href="{% url 'kpi_management:dailyfeedreels-list' %}">View More</a>
+                </div>
+              </div>
+            </div>
+            <p class="mb-1">Total Feed/Reels</p>
+            <h4 class="card-title mb-3">{{ total_feeds|default:0 }}</h4>
+            <small class="text-success fw-medium">
+              <i class="icon-base bx bx-up-arrow-alt"></i>
+              Active Content
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Total Revenue Chart -->
+  <div class="col-12 col-xxl-8 order-2 order-md-3 order-xxl-2 mb-6">
+    <div class="card">
+      <div class="row row-bordered g-0">
+        <div class="col-lg-8">
+          <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="card-title mb-0">
+              <h5 class="m-0 me-2">Total Revenue & Performance</h5>
+            </div>
+            <div class="dropdown">
+              <button class="btn p-0" type="button" id="totalRevenue" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="icon-base bx bx-dots-vertical-rounded icon-lg text-body-secondary"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end" aria-labelledby="totalRevenue">
+                <a class="dropdown-item" href="{% url 'kpi_management:collabbrand-list' %}">View All Collabs</a>
+                <a class="dropdown-item" href="{% url 'kpi_management:report-list' %}">View Reports</a>
+              </div>
+            </div>
+          </div>
+          <div id="totalRevenueChart" class="px-3"></div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card-body px-xl-9 py-12 d-flex align-items-center flex-column">
+            <div class="text-center mb-6">
+              <div class="btn-group">
+                <button type="button" class="btn btn-outline-primary">
+                  <script>
+                    document.write(new Date().getFullYear());
+                  </script>
+                </button>
+              </div>
+            </div>
+
+            <div id="growthChart"></div>
+            <div class="text-center fw-medium my-6">{{ engagement_avg|default:0|floatformat:0 }}% Engagement Rate</div>
+
+            <div class="d-flex gap-11 justify-content-between">
+              <div class="d-flex">
+                <div class="avatar me-2">
+                  <span class="avatar-initial rounded-2 bg-label-success">
+                    <i class="icon-base bx bx-dollar icon-lg text-success"></i>
+                  </span>
+                </div>
+                <div class="d-flex flex-column">
+                  <small>Total Revenue</small>
+                  <h6 class="mb-0">{{ total_revenue|default:0|format_k }}</h6>
+                </div>
+              </div>
+              <div class="d-flex">
+                <div class="avatar me-2">
+                  <span class="avatar-initial rounded-2 bg-label-warning">
+                    <i class="icon-base bx bx-time icon-lg text-warning"></i>
+                  </span>
+                </div>
+                <div class="d-flex flex-column">
+                  <small>Pending</small>
+                  <h6 class="mb-0">{{ pending_revenue|default:0|format_k }}</h6>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile Report & Stats -->
+  <div class="col-12 col-md-8 col-lg-12 col-xxl-4 order-3 order-md-2 mb-6">
+    <div class="row">
+      <div class="col-6 mb-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="card-title d-flex align-items-start justify-content-between mb-4">
+              <div class="avatar flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-primary">
+                  <i class="icon-base bx bx-bullseye icon-lg"></i>
+                </span>
+              </div>
+              <div class="dropdown">
+                <button class="btn p-0" type="button" id="cardOptCampaign" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="icon-base bx bx-dots-vertical-rounded text-body-secondary"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOptCampaign">
+                  <a class="dropdown-item" href="{% url 'kpi_management:campaign-list' %}">View More</a>
+                </div>
+              </div>
+            </div>
+            <p class="mb-1">Campaigns</p>
+            <h4 class="card-title mb-3">{{ total_campaigns|default:0 }}</h4>
+            <small class="text-success fw-medium">
+              <i class="icon-base bx bx-up-arrow-alt"></i>
+              Active
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 mb-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="card-title d-flex align-items-start justify-content-between mb-4">
+              <div class="avatar flex-shrink-0">
+                <span class="avatar-initial rounded bg-label-warning">
+                  <i class="icon-base bx bx-trending-up icon-lg"></i>
+                </span>
+              </div>
+              <div class="dropdown">
+                <button class="btn p-0" type="button" id="cardOptFYP" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="icon-base bx bx-dots-vertical-rounded text-body-secondary"></i>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="cardOptFYP">
+                  <a class="dropdown-item" href="{% url 'kpi_management:fyppostvalue-list' %}">View More</a>
+                </div>
+              </div>
+            </div>
+            <p class="mb-1">FYP Posts</p>
+            <h4 class="card-title mb-3">{{ total_fyp_posts|default:0 }}</h4>
+            <small class="text-success fw-medium">
+              <i class="icon-base bx bx-up-arrow-alt"></i>
+              Viral Content
+            </small>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 mb-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center flex-sm-row flex-column gap-10 flex-wrap">
+              <div class="d-flex flex-sm-column flex-row align-items-start justify-content-between">
+                <div class="card-title mb-6">
+                  <h5 class="text-nowrap mb-1">Performance Report</h5>
+                  <span class="badge bg-label-primary">MONTH {{ "now"|date:"M Y" }}</span>
+                </div>
+                <div class="mt-sm-auto">
+                  <span class="text-success text-nowrap fw-medium">
+                    <i class="icon-base bx bx-up-arrow-alt"></i>
+                    {{ engagement_avg|default:0|floatformat:1 }}%
+                  </span>
+                  <h4 class="mb-0">{{ total_views|default:0|floatformat:0 }} Views</h4>
+                </div>
+              </div>
+              <div id="profileReportChart"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Content Statistics -->
+  <div class="col-md-6 col-lg-4 col-xl-4 order-0 mb-6">
+    <div class="card h-100">
+      <div class="card-header d-flex justify-content-between">
+        <div class="card-title mb-0">
+          <h5 class="mb-1 me-2">Content Statistics</h5>
+          <p class="card-subtitle">{{ total_stories|default:0|add:total_feeds|default:0 }} Total Content</p>
+        </div>
+        <div class="dropdown">
+          <button class="btn text-body-secondary p-0" type="button" id="contentStatistics" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="icon-base bx bx-dots-vertical-rounded icon-lg"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="contentStatistics">
+            <a class="dropdown-item" href="{% url 'kpi_management:story-list' %}">View Stories</a>
+            <a class="dropdown-item" href="{% url 'kpi_management:dailyfeedreels-list' %}">View Feeds</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-6">
+          <div class="d-flex flex-column align-items-center gap-1">
+            <h3 class="mb-1">{{ total_stories|default:0|add:total_feeds|default:0 }}</h3>
+            <small>Total Content</small>
+          </div>
+          <div id="orderStatisticsChart" style="width: 136px; height: 165px;"></div>
+        </div>
+        <ul class="p-0 m-0">
+          <li class="d-flex align-items-center mb-5">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-primary">
+                <i class="icon-base bx bx-book-content"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">Stories</h6>
+                <small>Instagram, Facebook, TikTok</small>
+              </div>
+              <div class="user-progress">
+                <h6 class="mb-0">{{ total_stories|default:0 }}</h6>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center mb-5">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-success">
+                <i class="icon-base bx bx-video"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">Feed/Reels</h6>
+                <small>Daily Posts, Reels</small>
+              </div>
+              <div class="user-progress">
+                <h6 class="mb-0">{{ total_feeds|default:0 }}</h6>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center mb-5">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-info">
+                <i class="icon-base bx bx-bullseye"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">Campaigns</h6>
+                <small>Marketing Campaigns</small>
+              </div>
+              <div class="user-progress">
+                <h6 class="mb-0">{{ total_campaigns|default:0 }}</h6>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-warning">
+                <i class="icon-base bx bx-group"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <h6 class="mb-0">Collabs</h6>
+                <small>Brand Collaborations</small>
+              </div>
+              <div class="user-progress">
+                <h6 class="mb-0">{{ total_collabs|default:0 }}</h6>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Performance Overview -->
+  <div class="col-md-6 col-lg-4 order-1 mb-6">
+    <div class="card h-100">
+      <div class="card-header nav-align-top">
+        <ul class="nav nav-pills flex-wrap row-gap-2" role="tablist">
+          <li class="nav-item">
+            <button type="button" class="nav-link active" role="tab" data-bs-toggle="tab" data-bs-target="#navs-tabs-line-card-views" aria-controls="navs-tabs-line-card-views" aria-selected="true">Views</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-tabs-line-card-engagement" aria-controls="navs-tabs-line-card-engagement" aria-selected="false">Engagement</button>
+          </li>
+          <li class="nav-item">
+            <button type="button" class="nav-link" role="tab" data-bs-toggle="tab" data-bs-target="#navs-tabs-line-card-reach" aria-controls="navs-tabs-line-card-reach" aria-selected="false">Reach</button>
+          </li>
+        </ul>
+      </div>
+      <div class="card-body">
+        <div class="tab-content p-0">
+          <div class="tab-pane fade show active" id="navs-tabs-line-card-views" role="tabpanel">
+            <div class="d-flex mb-6">
+              <div class="avatar flex-shrink-0 me-3">
+                <span class="avatar-initial rounded bg-label-primary">
+                  <i class="icon-base bx bx-show icon-lg"></i>
+                </span>
+              </div>
+              <div>
+                <p class="mb-0">Total Views</p>
+                <div class="d-flex align-items-center">
+                  <h6 class="mb-0 me-1">{{ total_views|default:0|floatformat:0 }}</h6>
+                  <small class="text-success fw-medium">
+                    <i class="icon-base bx bx-chevron-up icon-lg"></i>
+                    {{ engagement_avg|default:0|floatformat:1 }}%
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div id="incomeChart"></div>
+            <div class="d-flex align-items-center justify-content-center mt-6 gap-3">
+              <div class="flex-shrink-0">
+                <div id="expensesOfWeek"></div>
+              </div>
+              <div>
+                <h6 class="mb-0">Views this week</h6>
+                <small>From all content</small>
+              </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="navs-tabs-line-card-engagement" role="tabpanel">
+            <div class="d-flex mb-6">
+              <div class="avatar flex-shrink-0 me-3">
+                <span class="avatar-initial rounded bg-label-success">
+                  <i class="icon-base bx bx-bar-chart-alt-2 icon-lg"></i>
+                </span>
+              </div>
+              <div>
+                <p class="mb-0">Engagement Rate</p>
+                <div class="d-flex align-items-center">
+                  <h6 class="mb-0 me-1">{{ engagement_avg|default:0|floatformat:2 }}%</h6>
+                  <small class="text-success fw-medium">
+                    <i class="icon-base bx bx-chevron-up icon-lg"></i>
+                    Average
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div id="engagementChart"></div>
+          </div>
+          <div class="tab-pane fade" id="navs-tabs-line-card-reach" role="tabpanel">
+            <div class="d-flex mb-6">
+              <div class="avatar flex-shrink-0 me-3">
+                <span class="avatar-initial rounded bg-label-info">
+                  <i class="icon-base bx bx-target-lock icon-lg"></i>
+                </span>
+              </div>
+              <div>
+                <p class="mb-0">Total Reach</p>
+                <div class="d-flex align-items-center">
+                  <h6 class="mb-0 me-1">{{ total_reach|default:0|floatformat:0 }}</h6>
+                  <small class="text-success fw-medium">
+                    <i class="icon-base bx bx-chevron-up icon-lg"></i>
+                    Unique Reach
+                  </small>
+                </div>
+              </div>
+            </div>
+            <div id="reachChart"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions & Links -->
+  <div class="col-md-6 col-lg-4 order-2 mb-6">
+    <div class="card h-100">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="card-title m-0 me-2">Quick Actions</h5>
+        <div class="dropdown">
+          <button class="btn text-body-secondary p-0" type="button" id="quickActionsID" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="icon-base bx bx-dots-vertical-rounded icon-lg"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="quickActionsID">
+            <a class="dropdown-item" href="{% url 'kpi_management:dashboard-management' %}">Dashboard Detail</a>
+            <a class="dropdown-item" href="{% url 'kpi_management:report-list' %}">View Reports</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body pt-4">
+        <ul class="p-0 m-0">
+          <li class="d-flex align-items-center mb-6">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-primary">
+                <i class="icon-base bx bx-plus"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <small class="d-block">Story</small>
+                <h6 class="fw-normal mb-0">Create New Story</h6>
+              </div>
+              <div class="user-progress d-flex align-items-center gap-2">
+                <a href="{% url 'kpi_management:story-create' %}" class="btn btn-sm btn-primary">+</a>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center mb-6">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-success">
+                <i class="icon-base bx bx-video"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <small class="d-block">Feed/Reels</small>
+                <h6 class="fw-normal mb-0">Create New Feed</h6>
+              </div>
+              <div class="user-progress d-flex align-items-center gap-2">
+                <a href="{% url 'kpi_management:dailyfeedreels-create' %}" class="btn btn-sm btn-success">+</a>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center mb-6">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-warning">
+                <i class="icon-base bx bx-bullseye"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <small class="d-block">Campaign</small>
+                <h6 class="fw-normal mb-0">Create Campaign</h6>
+              </div>
+              <div class="user-progress d-flex align-items-center gap-2">
+                <a href="{% url 'kpi_management:campaign-create' %}" class="btn btn-sm btn-warning">+</a>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center mb-6">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-info">
+                <i class="icon-base bx bx-trophy"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <small class="d-block">Leaderboard</small>
+                <h6 class="fw-normal mb-0">FYP Leaderboard</h6>
+              </div>
+              <div class="user-progress d-flex align-items-center gap-2">
+                <a href="{% url 'kpi_management:fyp-leaderboard' %}" class="btn btn-sm btn-info">View</a>
+              </div>
+            </div>
+          </li>
+          <li class="d-flex align-items-center">
+            <div class="avatar flex-shrink-0 me-3">
+              <span class="avatar-initial rounded bg-label-danger">
+                <i class="icon-base bx bx-file"></i>
+              </span>
+            </div>
+            <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+              <div class="me-2">
+                <small class="d-block">Reports</small>
+                <h6 class="fw-normal mb-0">View Reports</h6>
+              </div>
+              <div class="user-progress d-flex align-items-center gap-2">
+                <a href="{% url 'kpi_management:report-list' %}" class="btn btn-sm btn-danger">View</a>
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Platform Comparison Chart -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Perbandingan Performa Antar Platform</h5>
+        <div class="dropdown">
+          <button class="btn p-0" type="button" id="platformChartOpt" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="icon-base bx bx-dots-vertical-rounded icon-lg text-body-secondary"></i>
+          </button>
+          <div class="dropdown-menu dropdown-menu-end" aria-labelledby="platformChartOpt">
+            <a class="dropdown-item" href="{% url 'kpi_management:story-list' %}">View Stories</a>
+            <a class="dropdown-item" href="{% url 'kpi_management:dailyfeedreels-list' %}">View Feeds</a>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="platformChart" style="min-height: 350px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block page_js %}
+<script>
+  'use strict';
+
+  // Check if dark mode is active
+  const isDarkMode = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+
+  // Dark mode colors for charts
+  const darkModeColors = {
+    textColor: '#E4E6EB',
+    gridColor: '#3A3D4F',
+    tooltipBg: '#2F3142',
+    tooltipBorder: '#3A3D4F',
+    legendText: '#E4E6EB'
+  };
+
+  // Light mode colors for charts
+  const lightModeColors = {
+    textColor: '#697a8d',
+    gridColor: '#e7e7e7',
+    tooltipBg: '#fff',
+    tooltipBorder: '#e0e0e0',
+    legendText: '#697a8d'
+  };
+
+  // Get current theme colors
+  const themeColors = isDarkMode ? darkModeColors : lightModeColors;
+
+  // Parse data from context
+  const trendData = {{ trend_data|safe }};
+  const platformData = {{ platform_data|safe }};
+  const statusData = {{ status_data|safe }};
+  const contentStatsData = {{ content_stats_data|safe }};
+
+  // Total Revenue Chart - Bar Chart
+  const totalRevenueChartEl = document.querySelector('#totalRevenueChart');
+  if (totalRevenueChartEl && trendData.dates && trendData.dates.length > 0) {
+    const totalRevenueChartConfig = {
+      chart: {
+        height: 300,
+        type: 'bar',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Views',
+          data: trendData.views || []
+        },
+        {
+          name: 'Reach',
+          data: trendData.reach || []
+        }
+      ],
+      xaxis: {
+        categories: trendData.dates || [],
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      colors: ['#696cff', '#71dd37'],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '60%',
+          endingShape: 'rounded'
+        }
+      },
+      dataLabels: {
+        enabled: true
+      },
+      legend: {
+        show: true,
+        position: 'top',
+        labels: {
+          colors: themeColors.legendText
+        }
+      },
+      grid: {
+        borderColor: themeColors.gridColor
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const totalRevenueChart = new ApexCharts(totalRevenueChartEl, totalRevenueChartConfig);
+    totalRevenueChart.render();
+  }
+
+  // Growth Chart - Radial Chart
+  const growthChartEl = document.querySelector('#growthChart');
+  if (growthChartEl) {
+    const growthChartConfig = {
+      series: [{{ engagement_avg|default:0|floatformat:0 }}],
+      chart: {
+        height: 200,
+        type: 'radialBar'
+      },
+      plotOptions: {
+        radialBar: {
+          hollow: {
+            size: '70%'
+          },
+          dataLabels: {
+            show: true,
+            name: {
+              show: false
+            },
+            value: {
+              formatter: function(val) {
+                return val.toFixed(1) + '%';
+              },
+              fontSize: '24px',
+              fontWeight: 600,
+              color: themeColors.textColor
+            }
+          },
+          track: {
+            background: isDarkMode ? '#2F3142' : '#e7e7e7'
+          }
+        }
+      },
+      colors: ['#696cff'],
+      stroke: {
+        lineCap: 'round'
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const growthChart = new ApexCharts(growthChartEl, growthChartConfig);
+    growthChart.render();
+  }
+
+  // Profile Report Chart - Line Chart
+  const profileReportChartEl = document.querySelector('#profileReportChart');
+  if (profileReportChartEl && trendData.dates && trendData.dates.length > 0) {
+    const profileReportChartConfig = {
+      chart: {
+        height: 80,
+        type: 'line',
+        sparkline: {
+          enabled: true
+        },
+        toolbar: { show: false }
+      },
+      series: [{
+        data: trendData.views || []
+      }],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      colors: ['#ffab00'],
+      markers: {
+        size: 4,
+        colors: ['#ffab00'],
+        strokeColors: isDarkMode ? '#282A3A' : '#fff',
+        strokeWidth: 2
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const profileReportChart = new ApexCharts(profileReportChartEl, profileReportChartConfig);
+    profileReportChart.render();
+  }
+
+  // Order Statistics Chart - Donut Chart (Content Statistics)
+  const orderStatisticsChartEl = document.querySelector('#orderStatisticsChart');
+
+  if (orderStatisticsChartEl) {
+    // Get config colors from global config if available, otherwise use defaults
+    let cardColor = '#fff';
+    let headingColor = '#696cff';
+    let legendColor = '#a1acb8';
+    let fontFamily = 'Public Sans';
+
+    if (typeof config !== 'undefined' && config.colors) {
+      cardColor = config.colors.cardColor || '#fff';
+      headingColor = config.colors.headingColor || '#696cff';
+      legendColor = config.colors.bodyColor || '#a1acb8';
+    }
+    if (typeof config !== 'undefined' && config.fontFamily) {
+      fontFamily = config.fontFamily;
+    }
+
+    let chartColors = ['#71dd37', '#696cff', '#ffab00', '#ff3e1d'];
+    if (typeof config !== 'undefined' && config.colors) {
+      chartColors = [
+        config.colors.success || '#71dd37',
+        config.colors.primary || '#696cff',
+        config.colors.warning || '#ffab00',
+        config.colors.danger || '#ff3e1d'
+      ];
+    }
+
+    // Calculate percentages from series data
+    let seriesData = contentStatsData && contentStatsData.series ? contentStatsData.series : [1, 1, 1, 1];
+    let total = seriesData.reduce((a, b) => a + b, 0);
+    let percentages = total > 0 ? seriesData.map(val => Math.round((val / total) * 100)) : [25, 25, 25, 25];
+    let weeklyPercentage = percentages[0] || 25; // Use first category as "Weekly" percentage
+
+    const orderStatisticsChartConfig = {
+      chart: {
+        height: 165,
+        width: 136,
+        type: 'donut',
+        offsetX: 15
+      },
+      labels: contentStatsData && contentStatsData.labels ? contentStatsData.labels : ['Stories', 'Feed/Reels', 'Campaigns', 'Collabs'],
+      series: seriesData,
+      colors: chartColors,
+      stroke: {
+        width: 5,
+        colors: [isDarkMode ? '#282A3A' : cardColor]
+      },
+      dataLabels: {
+        enabled: false,
+        formatter: function (val, opt) {
+          return parseInt(val) + '%';
+        }
+      },
+      legend: {
+        show: false
+      },
+      grid: {
+        padding: {
+          top: 0,
+          bottom: 0,
+          right: 15
+        }
+      },
+      states: {
+        hover: {
+          filter: { type: 'none' }
+        },
+        active: {
+          filter: { type: 'none' }
+        }
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: '75%',
+            labels: {
+              show: true,
+              value: {
+                fontSize: '1.125rem',
+                fontFamily: fontFamily,
+                fontWeight: 500,
+                color: isDarkMode ? '#E4E6EB' : headingColor,
+                offsetY: -17,
+                formatter: function (val) {
+                  return parseInt(val) + '%';
+                }
+              },
+              name: {
+                offsetY: 17,
+                fontFamily: fontFamily,
+                color: isDarkMode ? '#A7ACB2' : legendColor
+              },
+              total: {
+                show: true,
+                fontSize: '13px',
+                color: isDarkMode ? '#A7ACB2' : legendColor,
+                label: 'Weekly',
+                formatter: function (w) {
+                  return weeklyPercentage + '%';
+                }
+              }
+            }
+          }
+        }
+      }
+    };
+    const orderStatisticsChart = new ApexCharts(orderStatisticsChartEl, orderStatisticsChartConfig);
+    orderStatisticsChart.render();
+  }
+
+  // Income Chart - Line Chart
+  const incomeChartEl = document.querySelector('#incomeChart');
+  if (incomeChartEl && trendData.dates && trendData.dates.length > 0) {
+    const incomeChartConfig = {
+      chart: {
+        height: 200,
+        type: 'line',
+        toolbar: { show: false },
+        sparkline: { enabled: false }
+      },
+      series: [{
+        name: 'Views',
+        data: trendData.views || []
+      }],
+      xaxis: {
+        categories: trendData.dates || [],
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      colors: ['#696cff'],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      markers: {
+        size: 4
+      },
+      grid: {
+        borderColor: themeColors.gridColor
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const incomeChart = new ApexCharts(incomeChartEl, incomeChartConfig);
+    incomeChart.render();
+  }
+
+  // Engagement Chart - Line Chart
+  const engagementChartEl = document.querySelector('#engagementChart');
+  if (engagementChartEl && trendData.dates && trendData.dates.length > 0) {
+    const engagementChartConfig = {
+      chart: {
+        height: 200,
+        type: 'line',
+        toolbar: { show: false },
+        sparkline: { enabled: false }
+      },
+      series: [{
+        name: 'Engagement Rate (%)',
+        data: trendData.engagement || []
+      }],
+      xaxis: {
+        categories: trendData.dates || [],
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      colors: ['#71dd37'],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      markers: {
+        size: 4
+      },
+      grid: {
+        borderColor: themeColors.gridColor
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const engagementChart = new ApexCharts(engagementChartEl, engagementChartConfig);
+    engagementChart.render();
+  }
+
+  // Reach Chart - Line Chart
+  const reachChartEl = document.querySelector('#reachChart');
+  if (reachChartEl && trendData.dates && trendData.dates.length > 0) {
+    const reachChartConfig = {
+      chart: {
+        height: 200,
+        type: 'line',
+        toolbar: { show: false },
+        sparkline: { enabled: false }
+      },
+      series: [{
+        name: 'Reach',
+        data: trendData.reach || []
+      }],
+      xaxis: {
+        categories: trendData.dates || [],
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      colors: ['#ffab00'],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      markers: {
+        size: 4
+      },
+      grid: {
+        borderColor: themeColors.gridColor
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const reachChart = new ApexCharts(reachChartEl, reachChartConfig);
+    reachChart.render();
+  }
+
+  // Expenses of Week - Radial Chart
+  const expensesOfWeekEl = document.querySelector('#expensesOfWeek');
+  if (expensesOfWeekEl) {
+    const expensesOfWeekConfig = {
+      series: [65],
+      chart: {
+        width: 60,
+        height: 60,
+        type: 'radialBar'
+      },
+      plotOptions: {
+        radialBar: {
+          startAngle: 0,
+          endAngle: 360,
+          strokeWidth: '8',
+          hollow: {
+            margin: 2,
+            size: '40%'
+          },
+          track: {
+            background: isDarkMode ? '#2F3142' : '#e7e7e7'
+          },
+          dataLabels: {
+            show: true,
+            name: {
+              show: false
+            },
+            value: {
+              formatter: function(val) {
+                return parseInt(val) + '%';
+              },
+              offsetY: 5,
+              fontSize: '12px',
+              show: true
+            }
+          }
+        }
+      },
+      fill: {
+        type: 'solid',
+        colors: ['#696cff']
+      },
+      stroke: {
+        lineCap: 'round'
+      }
+    };
+    const expensesOfWeek = new ApexCharts(expensesOfWeekEl, expensesOfWeekConfig);
+    expensesOfWeek.render();
+  }
+
+  // Platform Chart - Bar Chart
+  const platformChartEl = document.querySelector('#platformChart');
+  if (platformChartEl && platformData.labels && platformData.labels.length > 0) {
+    const platformChartConfig = {
+      chart: {
+        height: 350,
+        type: 'bar',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Story',
+          data: platformData.story_count || []
+        },
+        {
+          name: 'Feed/Reels',
+          data: platformData.feed_count || []
+        }
+      ],
+      xaxis: {
+        categories: platformData.labels || [],
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: themeColors.textColor
+          }
+        }
+      },
+      colors: ['#696cff', '#71dd37'],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '55%',
+          endingShape: 'rounded'
+        }
+      },
+      dataLabels: {
+        enabled: true
+      },
+      legend: {
+        show: true,
+        position: 'top',
+        labels: {
+          colors: themeColors.legendText
+        }
+      },
+      grid: {
+        borderColor: themeColors.gridColor
+      },
+      tooltip: {
+        theme: isDarkMode ? 'dark' : 'light'
+      }
+    };
+    const platformChart = new ApexCharts(platformChartEl, platformChartConfig);
+    platformChart.render();
+  }
+</script>
+{% endblock page_js %}

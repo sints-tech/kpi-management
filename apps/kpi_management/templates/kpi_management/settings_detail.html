@@ -1,0 +1,153 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Detail Pengaturan{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Detail Pengaturan</h5>
+        <div>
+          <a href="{% url 'kpi_management:settings-update' setting.pk %}" class="btn btn-primary btn-sm">
+            <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+          </a>
+          <a href="{% url 'kpi_management:settings-list' %}" class="btn btn-label-secondary btn-sm">
+            <i class="icon-base bx bx-arrow-back me-1"></i> Kembali
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nama (Key)</label>
+              <p class="form-control-plaintext">{{ setting.name }}</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Label</label>
+              <p class="form-control-plaintext">{{ setting.label }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Tipe Pengaturan</label>
+              <p>
+                <span class="badge bg-label-info">{{ setting.get_setting_type_display }}</span>
+              </p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Tipe Nilai</label>
+              <p>
+                <span class="badge bg-label-primary">{{ setting.get_value_type_display }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-12">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nilai</label>
+              <div class="card bg-label-light">
+                <div class="card-body">
+                  {% if setting.value_type == 'boolean' %}
+                    <span class="badge bg-label-{% if setting.get_value %}success{% else %}secondary{% endif %} fs-6">
+                      {{ setting.get_value|yesno:"Aktif,Nonaktif" }}
+                    </span>
+                  {% elif setting.value_type == 'json' %}
+                    <pre class="mb-0"><code>{{ setting.value|safe }}</code></pre>
+                  {% else %}
+                    <p class="mb-0">{{ setting.value|default:"-" }}</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% if setting.description %}
+          <div class="row mb-4">
+            <div class="col-12">
+              <div class="mb-3">
+                <label class="form-label fw-bold">Deskripsi</label>
+                <p class="form-control-plaintext">{{ setting.description }}</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Status</label>
+              <div>
+                {% if setting.is_active %}
+                  <span class="badge bg-label-success">Aktif</span>
+                {% else %}
+                  <span class="badge bg-label-danger">Nonaktif</span>
+                {% endif %}
+                {% if setting.is_public %}
+                  <span class="badge bg-label-primary ms-2">Public</span>
+                {% else %}
+                  <span class="badge bg-label-secondary ms-2">Private</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Dibuat Oleh</label>
+              <p class="form-control-plaintext">
+                {{ setting.created_by.get_full_name|default:setting.created_by.username|default:"-" }}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Dibuat Pada</label>
+              <p class="form-control-plaintext">{{ setting.created_at|date:"d M Y H:i:s" }}</p>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Diperbarui Pada</label>
+              <p class="form-control-plaintext">{{ setting.updated_at|date:"d M Y H:i:s" }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <a href="{% url 'kpi_management:settings-list' %}" class="btn btn-label-secondary">
+            <i class="icon-base bx bx-arrow-back me-1"></i> Kembali
+          </a>
+          <a href="{% url 'kpi_management:settings-update' setting.pk %}" class="btn btn-primary">
+            <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+          </a>
+          <a href="{% url 'kpi_management:settings-delete' setting.pk %}" class="btn btn-danger">
+            <i class="icon-base bx bx-trash me-1"></i> Hapus
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
