@@ -13,16 +13,26 @@ Refer to dashboards/urls.py file for more pages.
 class DashboardsView(TemplateView):
     # Predefined function
     def get_context_data(self, **kwargs):
-        # Initialize context dengan error handling yang lebih robust
+        # Initialize context dengan comprehensive error handling
         try:
+            # A function to init the global layout. It is defined in web_project/__init__.py file
             context = TemplateLayout.init(self, super().get_context_data(**kwargs))
         except Exception as e:
-            # Jika TemplateLayout.init error, create basic context
+            # Jika TemplateLayout.init error, create minimal context
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in TemplateLayout.init: {e}", exc_info=True)
             context = super().get_context_data(**kwargs)
-            context.update({
-                "layout_path": "templates/layout/master.html",
-            })
-        
+            try:
+                from web_project.template_helpers.theme import TemplateHelper
+                context.update({
+                    "layout_path": TemplateHelper.set_layout("layout_vertical.html", context),
+                })
+            except:
+                context.update({
+                    "layout_path": "templates/layout/bootstrap/layout_vertical.html",
+                })
+
         # Add KPI statistics dengan error handling
         try:
             from apps.kpi_management.models import Story, DailyFeedReels, Campaign, CollabBrand, FYPPostValue
@@ -30,15 +40,13 @@ class DashboardsView(TemplateView):
             from django.utils import timezone
             from datetime import timedelta
             import json
-        except (ImportError, Exception) as e:
-            # Jika models tidak bisa di-import (migrations belum dijalankan), gunakan default values
-            try:
-                layout_path = TemplateHelper.set_layout("layout_vertical.html", context)
-            except:
-                layout_path = context.get("layout_path", "templates/layout/master.html")
+        except ImportError as e:
+            # Jika models tidak bisa di-import (migrations belum dijalankan), set default values
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Models not available: {e}. Using default values.")
             
             context.update({
-                "layout_path": layout_path,
                 "total_stories": 0,
                 "total_feeds": 0,
                 "total_campaigns": 0,
@@ -241,23 +249,50 @@ class DashboardsView(TemplateView):
         except Exception:
             is_admin = False
 
-        context.update({
-            "layout_path": TemplateHelper.set_layout("layout_vertical.html", context),
-            "total_stories": total_stories,
-            "total_feeds": total_feeds,
-            "total_campaigns": total_campaigns,
-            "total_collabs": total_collabs,
-            "total_fyp_posts": total_fyp_posts,
-            "total_revenue": total_revenue,
-            "pending_revenue": pending_revenue,
-            "engagement_avg": round(engagement_avg, 2) if engagement_avg else 0.0,
-            "total_views": total_views,
-            "total_reach": total_reach,
-            "trend_data": json.dumps(trend_data),
-            "platform_data": json.dumps(platform_data),
-            "status_data": json.dumps(status_data),
-            "content_stats_data": json.dumps(content_stats_data),
-            "is_admin": is_admin,
-        })
+        try:
+            # Update layout path jika belum di-set
+            if "layout_path" not in context:
+                context["layout_path"] = TemplateHelper.set_layout("layout_vertical.html", context)
+            
+            context.update({
+                "total_stories": total_stories,
+                "total_feeds": total_feeds,
+                "total_campaigns": total_campaigns,
+                "total_collabs": total_collabs,
+                "total_fyp_posts": total_fyp_posts,
+                "total_revenue": total_revenue,
+                "pending_revenue": pending_revenue,
+                "engagement_avg": round(engagement_avg, 2) if engagement_avg else 0.0,
+                "total_views": total_views,
+                "total_reach": total_reach,
+                "trend_data": json.dumps(trend_data),
+                "platform_data": json.dumps(platform_data),
+                "status_data": json.dumps(status_data),
+                "content_stats_data": json.dumps(content_stats_data),
+                "is_admin": is_admin,
+            })
+        except Exception as e:
+            # Jika ada error saat update context, set default values
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error updating context: {e}", exc_info=True)
+            # Pastikan minimal context ada
+            if "layout_path" not in context:
+                context["layout_path"] = "templates/layout/bootstrap/layout_vertical.html"
+            context.setdefault("total_stories", 0)
+            context.setdefault("total_feeds", 0)
+            context.setdefault("total_campaigns", 0)
+            context.setdefault("total_collabs", 0)
+            context.setdefault("total_fyp_posts", 0)
+            context.setdefault("total_revenue", 0.0)
+            context.setdefault("pending_revenue", 0.0)
+            context.setdefault("engagement_avg", 0.0)
+            context.setdefault("total_views", 0)
+            context.setdefault("total_reach", 0)
+            context.setdefault("trend_data", "{}")
+            context.setdefault("platform_data", "{}")
+            context.setdefault("status_data", "{}")
+            context.setdefault("content_stats_data", "{}")
+            context.setdefault("is_admin", False)
 
         return context
