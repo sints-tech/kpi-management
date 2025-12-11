@@ -14,7 +14,7 @@ services:
     name: ibgadgetstore
     runtime: python
     plan: free  # atau starter/professional untuk production
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: pip install --upgrade pip && pip install Pillow==10.4.0 && pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput --clear
     startCommand: gunicorn config.wsgi:application
     envVars:
       - key: SECRET_KEY
