@@ -47,24 +47,26 @@ if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",") if host.strip()]
 else:
     # Default hosts including Render.com domain
+    # NOTE: Django supports wildcards in ALLOWED_HOSTS (e.g., ".onrender.com")
     ALLOWED_HOSTS = [
         "localhost",
         "0.0.0.0",
         "127.0.0.1",
         "kpi-management-creative.onrender.com",  # Render.com domain
-        ".onrender.com",  # Allow all Render.com subdomains
+        ".onrender.com",  # Allow all Render.com subdomains (wildcard supported here)
     ]
 
 # CSRF Trusted Origins for production
 # Default CSRF_TRUSTED_ORIGINS includes Render.com domain
+# NOTE: Django does NOT support wildcards in CSRF_TRUSTED_ORIGINS, must specify exact domains
 CSRF_TRUSTED_ORIGINS_ENV = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if CSRF_TRUSTED_ORIGINS_ENV:
     CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(",") if origin.strip()]
 else:
     # Default CSRF trusted origins for Render.com
+    # Must specify exact domains, no wildcards allowed
     CSRF_TRUSTED_ORIGINS = [
         "https://kpi-management-creative.onrender.com",
-        "https://*.onrender.com",  # Allow all Render.com subdomains
     ]
 
 # Current DJANGO_ENVIRONMENT

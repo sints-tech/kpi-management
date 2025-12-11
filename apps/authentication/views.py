@@ -16,6 +16,11 @@ Refer to auth/urls.py file for more pages.
 class AuthView(TemplateView):
     # Predefined function
     def get_context_data(self, **kwargs):
+        # Log to ensure view is being called
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"AuthView.get_context_data called for path: {self.request.path}")
+        
         # A function to init the global layout. It is defined in web_project/__init__.py file
         context = TemplateLayout.init(self, super().get_context_data(**kwargs))
 
