@@ -1,0 +1,68 @@
+{% extends layout_path %}
+{% load static %}
+{% block title %}{{ title|default:"Daily Feed/Reels Form" }}{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header"><h5 class="mb-0">{{ title|default:"Daily Feed/Reels Form" }}</h5></div>
+      <div class="card-body">
+        <form method="post" enctype="multipart/form-data">{% csrf_token %}
+          <div class="row mb-3">
+            <div class="col-md-6"><label class="form-label">{{ form.title.label }}</label>{{ form.title }}{% if form.title.errors %}<div class="text-danger">{{ form.title.errors }}</div>{% endif %}</div>
+            <div class="col-md-6"><label class="form-label">{{ form.content_type.label }}</label>{{ form.content_type }}{% if form.content_type.errors %}<div class="text-danger">{{ form.content_type.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6"><label class="form-label">{{ form.platform.label }}</label>{{ form.platform }}{% if form.platform.errors %}<div class="text-danger">{{ form.platform.errors }}</div>{% endif %}</div>
+            <div class="col-md-6"><label class="form-label">{{ form.account_name.label }}</label>{{ form.account_name }}{% if form.account_name.errors %}<div class="text-danger">{{ form.account_name.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="mb-3"><label class="form-label">{{ form.caption.label }}</label>{{ form.caption }}{% if form.caption.errors %}<div class="text-danger">{{ form.caption.errors }}</div>{% endif %}</div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">{{ form.content_url.label }}</label>
+              <div class="input-group">
+                {{ form.content_url }}
+                {% if form.content_url.value %}
+                <a href="{{ form.content_url.value }}" target="_blank" class="btn btn-outline-primary" type="button">
+                  <i class="bx bx-link-external"></i> Kunjungi
+                </a>
+                {% endif %}
+              </div>
+              {% if form.content_url.errors %}<div class="text-danger">{{ form.content_url.errors }}</div>{% endif %}
+              <small class="text-muted">Masukkan URL tautan konten (opsional)</small>
+            </div>
+            <div class="col-md-6"><label class="form-label">{{ form.thumbnail.label }}</label>{{ form.thumbnail }}{% if form.thumbnail.errors %}<div class="text-danger">{{ form.thumbnail.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-3"><label class="form-label">{{ form.views.label }}</label>{{ form.views }}{% if form.views.errors %}<div class="text-danger">{{ form.views.errors }}</div>{% endif %}</div>
+            <div class="col-md-3"><label class="form-label">{{ form.likes.label }}</label>{{ form.likes }}{% if form.likes.errors %}<div class="text-danger">{{ form.likes.errors }}</div>{% endif %}</div>
+            <div class="col-md-3"><label class="form-label">{{ form.comments.label }}</label>{{ form.comments }}{% if form.comments.errors %}<div class="text-danger">{{ form.comments.errors }}</div>{% endif %}</div>
+            <div class="col-md-3"><label class="form-label">{{ form.shares.label }}</label>{{ form.shares }}{% if form.shares.errors %}<div class="text-danger">{{ form.shares.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6"><label class="form-label">{{ form.target_post_date.label }}</label>{{ form.target_post_date }}{% if form.target_post_date.errors %}<div class="text-danger">{{ form.target_post_date.errors }}</div>{% endif %}</div>
+            <div class="col-md-6"><label class="form-label">{{ form.engagement_rate.label }}</label>{{ form.engagement_rate }}{% if form.engagement_rate.errors %}<div class="text-danger">{{ form.engagement_rate.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6"><label class="form-label">{{ form.publish_date.label }}</label>{{ form.publish_date }}{% if form.publish_date.errors %}<div class="text-danger">{{ form.publish_date.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6"><label class="form-label">{{ form.status.label }}</label>{{ form.status }}{% if form.status.errors %}<div class="text-danger">{{ form.status.errors }}</div>{% endif %}</div>
+            <div class="col-md-6"><label class="form-label">{{ form.tags.label }}</label>{{ form.tags }}{% if form.tags.errors %}<div class="text-danger">{{ form.tags.errors }}</div>{% endif %}</div>
+          </div>
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'kpi_management:dailyfeedreels-list' %}" class="btn btn-label-secondary">Batal</a>
+            <button type="submit" class="btn btn-primary">Simpan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

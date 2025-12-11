@@ -1,0 +1,311 @@
+{% extends layout_path %}
+{% load static %}
+{% block title %}FYP Post Value Management{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}"/>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">FYP Post Value Management</h5>
+        <div class="d-flex gap-2">
+          <a href="{% url 'kpi_management:fyppostvalue-export-csv' %}" class="btn btn-outline-success">
+            <i class="icon-base bx bx-download me-1"></i>
+            Export CSV
+          </a>
+          <a href="{% url 'kpi_management:fyppostvalue-create' %}" class="btn btn-primary">
+            <i class="icon-base bx bx-plus me-1"></i> Tambah FYP Post
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <form method="get" class="mb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <input type="text" name="search" class="form-control" placeholder="Cari..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+              <select name="platform" class="form-select">
+                <option value="">Semua Platform</option>
+                <option value="tiktok" {% if request.GET.platform == 'tiktok' %}selected{% endif %}>TikTok</option>
+                <option value="instagram" {% if request.GET.platform == 'instagram' %}selected{% endif %}>Instagram</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select name="account_name" class="form-select">
+                <option value="">Semua Akun</option>
+                {% for account in social_media_accounts %}
+                <option value="{{ account.account_name }}" {% if request.GET.account_name == account.account_name %}selected{% endif %}>
+                  {{ account.get_platform_display }} - {{ account.account_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">Filter</button>
+            </div>
+          </div>
+        </form>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Judul</th>
+                <th>Platform</th>
+                <th>Akun</th>
+                <th>FYP Views</th>
+                <th>Total Views</th>
+                <th>FYP %</th>
+                <th>Viral Score</th>
+                <th>Tanggal</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for fyp_post in fyp_posts %}
+              <tr>
+                <td><strong>{{ fyp_post.post_title }}</strong></td>
+                <td><span class="badge bg-label-info">{{ fyp_post.get_platform_display }}</span></td>
+                <td>{{ fyp_post.account_name }}</td>
+                <td>{{ fyp_post.fyp_views|default:0 }}</td>
+                <td>{{ fyp_post.total_views|default:0 }}</td>
+                <td>{{ fyp_post.fyp_percentage|floatformat:2 }}%</td>
+                <td>{{ fyp_post.viral_score|floatformat:2 }}</td>
+                <td>{{ fyp_post.post_date|date:"d M Y" }}</td>
+                <td>
+                  <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                      <i class="icon-base bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="{% url 'kpi_management:fyppostvalue-detail' fyp_post.pk %}">
+                        <i class="icon-base bx bx-show me-1"></i> Detail
+                      </a>
+                      <a class="dropdown-item" href="{% url 'kpi_management:fyppostvalue-update' fyp_post.pk %}">
+                        <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+                      </a>
+                      <a class="dropdown-item text-danger" href="{% url 'kpi_management:fyppostvalue-delete' fyp_post.pk %}">
+                        <i class="icon-base bx bx-trash me-1"></i> Hapus
+                      </a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" class="text-center">Tidak ada data</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="row g-4 mb-4">
+  <!-- Viral Score Trend Chart -->
+  <div class="col-xl-8 col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Viral Score Trend (30 Hari Terakhir)</h5>
+      </div>
+      <div class="card-body">
+        <div id="fypTrendChart" style="min-height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Distribution Chart -->
+  <div class="col-xl-4 col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Platform Distribution</h5>
+      </div>
+      <div class="card-body">
+        <div id="fypPlatformChart" style="min-height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Top Viral Posts -->
+{% if top_viral_posts %}
+<div class="row g-4 mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Top 5 Viral Posts</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Judul</th>
+                <th>Platform</th>
+                <th>Viral Score</th>
+                <th>FYP Views</th>
+                <th>FYP %</th>
+                <th>Tanggal</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for post in top_viral_posts %}
+              <tr>
+                <td><span class="badge bg-label-primary">#{{ forloop.counter }}</span></td>
+                <td><strong>{{ post.post_title }}</strong></td>
+                <td><span class="badge bg-label-info">{{ post.get_platform_display }}</span></td>
+                <td><strong>{{ post.viral_score|floatformat:2 }}</strong></td>
+                <td>{{ post.fyp_views|default:0 }}</td>
+                <td>{{ post.fyp_percentage|floatformat:2 }}%</td>
+                <td>{{ post.post_date|date:"d M Y" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block page_js %}
+<script>
+  'use strict';
+
+  // FYP Analytics Charts
+  const fypTrendData = {{ fyp_trend_data|default:"{}"|safe }};
+  const fypPlatformData = {{ fyp_platform_data|default:"{}"|safe }};
+
+  // Viral Score Trend Chart
+  const fypTrendChartEl = document.querySelector('#fypTrendChart');
+  if (fypTrendChartEl) {
+    // Ensure data exists
+    if (!fypTrendData.dates || fypTrendData.dates.length === 0) {
+      fypTrendData = { dates: [], viral_scores: [], fyp_views: [], total_views: [] };
+    }
+    const fypTrendChartConfig = {
+      chart: {
+        height: 300,
+        type: 'line',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Viral Score',
+          data: fypTrendData.viral_scores || []
+        },
+        {
+          name: 'FYP Views',
+          data: fypTrendData.fyp_views || []
+        },
+        {
+          name: 'Total Views',
+          data: fypTrendData.total_views || []
+        }
+      ],
+      xaxis: {
+        categories: fypTrendData.dates || [],
+        labels: {
+          rotate: -45,
+          rotateAlways: true
+        }
+      },
+      colors: ['#696cff', '#71dd37', '#ffab00'],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      markers: {
+        size: 4
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      },
+      yaxis: [
+        {
+          title: {
+            text: 'Viral Score'
+          }
+        },
+        {
+          opposite: true,
+          title: {
+            text: 'Views'
+          }
+        }
+      ]
+    };
+    const fypTrendChart = new ApexCharts(fypTrendChartEl, fypTrendChartConfig);
+    fypTrendChart.render();
+  }
+
+  // Platform Distribution Chart
+  const fypPlatformChartEl = document.querySelector('#fypPlatformChart');
+  if (fypPlatformChartEl) {
+    // Ensure data exists
+    if (!fypPlatformData.labels || fypPlatformData.labels.length === 0) {
+      fypPlatformData = { labels: ['TikTok', 'Instagram'], viral_scores: [0, 0], fyp_percentages: [0, 0], count: [0, 0] };
+    }
+    const fypPlatformChartConfig = {
+      chart: {
+        height: 300,
+        type: 'bar',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Viral Score',
+          data: fypPlatformData.viral_scores || []
+        },
+        {
+          name: 'FYP %',
+          data: fypPlatformData.fyp_percentages || []
+        }
+      ],
+      xaxis: {
+        categories: fypPlatformData.labels || []
+      },
+      colors: ['#696cff', '#71dd37'],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '60%',
+          endingShape: 'rounded'
+        }
+      },
+      dataLabels: {
+        enabled: true
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      }
+    };
+    const fypPlatformChart = new ApexCharts(fypPlatformChartEl, fypPlatformChartConfig);
+    fypPlatformChart.render();
+  }
+</script>
+{% endblock page_js %}

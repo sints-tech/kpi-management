@@ -1,0 +1,384 @@
+{% extends layout_path %}
+{% load static %}
+{% block title %}Daily Feed/Reels Management{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Daily Feed/Reels Management</h5>
+        <div class="d-flex gap-2">
+          <a href="{% url 'kpi_management:dailyfeedreels-export-csv' %}" class="btn btn-outline-success">
+            <i class="icon-base bx bx-download me-1"></i>
+            Export CSV
+          </a>
+          <a href="{% url 'kpi_management:dailyfeedreels-create' %}" class="btn btn-primary">
+            <i class="icon-base bx bx-plus me-1"></i> Tambah Feed/Reels
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <form method="get" class="mb-4">
+          <div class="row g-3">
+            <div class="col-md-3"><input type="text" name="search" class="form-control" placeholder="Cari..." value="{{ request.GET.search }}"></div>
+            <div class="col-md-2">
+              <select name="company" class="form-select">
+                <option value="">Semua Perusahaan</option>
+                {% for company in companies %}
+                <option value="{{ company.id }}" {% if request.GET.company == company.id|stringformat:"s" %}selected{% endif %}>
+                  {{ company.name }} ({{ company.get_company_type_display }})
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select name="content_type" class="form-select">
+                <option value="">Semua Tipe</option>
+                <option value="feed" {% if request.GET.content_type == 'feed' %}selected{% endif %}>Feed</option>
+                <option value="reels" {% if request.GET.content_type == 'reels' %}selected{% endif %}>Reels</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select name="platform" class="form-select">
+                <option value="">Semua Platform</option>
+                <option value="instagram" {% if request.GET.platform == 'instagram' %}selected{% endif %}>Instagram</option>
+                <option value="tiktok" {% if request.GET.platform == 'tiktok' %}selected{% endif %}>TikTok</option>
+                <option value="facebook" {% if request.GET.platform == 'facebook' %}selected{% endif %}>Facebook</option>
+                <option value="youtube" {% if request.GET.platform == 'youtube' %}selected{% endif %}>YouTube</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <select name="account_name" class="form-select">
+                <option value="">Semua Akun</option>
+                {% for account in social_media_accounts %}
+                <option value="{{ account.account_name }}" {% if request.GET.account_name == account.account_name %}selected{% endif %}>
+                  {{ account.get_platform_display }} - {{ account.account_name }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2"><button type="submit" class="btn btn-primary w-100">Filter</button></div>
+          </div>
+        </form>
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                {% if is_admin %}
+                <th width="30">
+                  <input type="checkbox" id="selectAll" class="form-check-input">
+                </th>
+                {% endif %}
+                <th>Judul</th>
+                <th>Tipe</th>
+                <th>Platform</th>
+                <th>Akun</th>
+                <th>Views</th>
+                <th>Engagement</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for feed in page_obj %}
+              <tr>
+                {% if is_admin %}
+                <td>
+                  <input type="checkbox" name="feed_ids" value="{{ feed.id }}" class="form-check-input feed-checkbox">
+                </td>
+                {% endif %}
+                <td><strong>{{ feed.title }}</strong></td>
+                <td><span class="badge bg-label-info">{{ feed.get_content_type_display }}</span></td>
+                <td><span class="badge bg-label-primary">{{ feed.get_platform_display }}</span></td>
+                <td>{{ feed.account_name }}</td>
+                <td>{{ feed.views|default:0 }}</td>
+                <td>{{ feed.engagement_rate|floatformat:2 }}%</td>
+                <td>{{ feed.publish_date|date:"d M Y" }}</td>
+                <td>
+                  {% if feed.status == 'published' %}<span class="badge bg-label-success">Published</span>
+                  {% elif feed.status == 'scheduled' %}<span class="badge bg-label-warning">Scheduled</span>
+                  {% else %}<span class="badge bg-label-secondary">{{ feed.get_status_display }}</span>{% endif %}
+                </td>
+                <td>
+                  <div class="dropdown">
+                    <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                      <i class="icon-base bx bx-dots-vertical-rounded"></i>
+                    </button>
+                    <div class="dropdown-menu">
+                      <a class="dropdown-item" href="{% url 'kpi_management:dailyfeedreels-detail' feed.pk %}"><i class="icon-base bx bx-show me-1"></i> Detail</a>
+                      <a class="dropdown-item" href="{% url 'kpi_management:dailyfeedreels-update' feed.pk %}"><i class="icon-base bx bx-edit-alt me-1"></i> Edit</a>
+                      <a class="dropdown-item text-danger" href="{% url 'kpi_management:dailyfeedreels-delete' feed.pk %}"><i class="icon-base bx bx-trash me-1"></i> Hapus</a>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="9" class="text-center">Tidak ada data</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if is_paginated %}
+        <nav aria-label="Page navigation">
+          <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.content_type %}&content_type={{ request.GET.content_type }}{% endif %}{% if request.GET.platform %}&platform={{ request.GET.platform }}{% endif %}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.company %}&company={{ request.GET.company }}{% endif %}{% if request.GET.content_type %}&content_type={{ request.GET.content_type }}{% endif %}{% if request.GET.platform %}&platform={{ request.GET.platform }}{% endif %}">Next</a>
+            </li>
+            {% endif %}
+          </ul>
+        </nav>
+        {% endif %}
+
+        {% if is_admin %}
+        <!-- Bulk Actions -->
+        <div class="card mt-4">
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <select id="bulkActionSelect" class="form-select">
+                  <option value="">Pilih Aksi</option>
+                  <option value="update_status">Update Status</option>
+                  <option value="assign_campaign">Assign Campaign</option>
+                  <option value="delete">Hapus</option>
+                </select>
+              </div>
+              <div id="bulkActionExtra" class="col-md-6" style="display: none;">
+                <select id="newStatusSelect" class="form-select" style="display: none;">
+                  <option value="">Pilih Status Baru</option>
+                  <option value="draft">Draft</option>
+                  <option value="scheduled">Scheduled</option>
+                  <option value="published">Published</option>
+                  <option value="archived">Archived</option>
+                </select>
+                <select id="campaignSelect" class="form-select" style="display: none;">
+                  <option value="">Pilih Campaign</option>
+                  {% for campaign in campaigns %}
+                  <option value="{{ campaign.id }}">{{ campaign.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-3">
+                <form method="post" action="{% url 'kpi_management:dailyfeedreels-bulk-action' %}" id="bulkActionForm">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" id="bulkActionInput">
+                  <input type="hidden" name="feed_ids" id="bulkFeedIdsInput">
+                  <button type="submit" id="bulkActionBtn" class="btn btn-primary w-100" disabled>Terapkan</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics & Visualization Section -->
+<div class="row g-4 mb-4">
+  <!-- Daily Performance Graph -->
+  <div class="col-xl-8 col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Daily Performance (30 Hari Terakhir)</h5>
+      </div>
+      <div class="card-body">
+        <div id="feedDailyPerfChart" style="min-height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Performance Comparison -->
+  <div class="col-xl-4 col-lg-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Feed vs Reels Comparison</h5>
+      </div>
+      <div class="card-body">
+        <div id="feedContentComparisonChart" style="min-height: 300px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block vendor_css %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'vendor/libs/apex-charts/apex-charts.css' %}"/>
+{% endblock vendor_css %}
+
+{% block vendor_js %}
+  {{ block.super }}
+  <script src="{% static 'vendor/libs/apex-charts/apexcharts.js' %}"></script>
+{% endblock vendor_js %}
+
+{% block page_js %}
+<script>
+  'use strict';
+
+  // Bulk Actions Script (similar to Story)
+  const selectAll = document.getElementById('selectAll');
+  const feedCheckboxes = document.querySelectorAll('.feed-checkbox');
+  const bulkActionSelect = document.getElementById('bulkActionSelect');
+  const bulkActionExtra = document.getElementById('bulkActionExtra');
+  const newStatusSelect = document.getElementById('newStatusSelect');
+  const campaignSelect = document.getElementById('campaignSelect');
+  const bulkActionBtn = document.getElementById('bulkActionBtn');
+
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      feedCheckboxes.forEach(cb => cb.checked = this.checked);
+      updateBulkActionBtn();
+    });
+  }
+
+  if (feedCheckboxes.length > 0) {
+    feedCheckboxes.forEach(cb => {
+      cb.addEventListener('change', updateBulkActionBtn);
+    });
+  }
+
+  function updateBulkActionBtn() {
+    const checked = document.querySelectorAll('.feed-checkbox:checked').length;
+    if (bulkActionBtn) {
+      bulkActionBtn.disabled = !(checked > 0 && bulkActionSelect.value);
+    }
+  }
+
+  if (bulkActionSelect) {
+    bulkActionSelect.addEventListener('change', function() {
+      const action = this.value;
+      if (action) {
+        bulkActionExtra.style.display = 'block';
+        newStatusSelect.style.display = action === 'update_status' ? 'block' : 'none';
+        campaignSelect.style.display = action === 'assign_campaign' ? 'block' : 'none';
+      } else {
+        bulkActionExtra.style.display = 'none';
+      }
+      updateBulkActionBtn();
+    });
+  }
+
+  if (bulkActionBtn) {
+    bulkActionBtn.addEventListener('click', function(e) {
+      const checked = document.querySelectorAll('.feed-checkbox:checked').length;
+      if (checked === 0) {
+        e.preventDefault();
+        alert('Pilih minimal satu feed/reel!');
+        return false;
+      }
+      if (!confirm(`Yakin ingin melakukan aksi ini pada ${checked} feed/reel?`)) {
+        e.preventDefault();
+        return false;
+      }
+    });
+  }
+
+  // Feed Analytics Charts
+  const feedDailyPerfData = {{ feed_daily_perf_data|default:"{}"|safe }};
+  const feedContentComparison = {{ feed_content_comparison|default:"{}"|safe }};
+
+  // Daily Performance Chart
+  const feedDailyPerfChartEl = document.querySelector('#feedDailyPerfChart');
+  if (feedDailyPerfChartEl && feedDailyPerfData.dates && feedDailyPerfData.dates.length > 0) {
+    const feedDailyPerfChartConfig = {
+      chart: {
+        height: 300,
+        type: 'line',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Views',
+          data: feedDailyPerfData.views || []
+        },
+        {
+          name: 'Likes',
+          data: feedDailyPerfData.likes || []
+        },
+        {
+          name: 'Engagement Rate (%)',
+          data: feedDailyPerfData.engagement || []
+        }
+      ],
+      xaxis: {
+        categories: feedDailyPerfData.dates || [],
+        labels: {
+          rotate: -45,
+          rotateAlways: true
+        }
+      },
+      colors: ['#696cff', '#71dd37', '#ffab00'],
+      stroke: {
+        width: 2,
+        curve: 'smooth'
+      },
+      markers: {
+        size: 4
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      }
+    };
+    const feedDailyPerfChart = new ApexCharts(feedDailyPerfChartEl, feedDailyPerfChartConfig);
+    feedDailyPerfChart.render();
+  }
+
+  // Content Comparison Chart
+  const feedContentComparisonChartEl = document.querySelector('#feedContentComparisonChart');
+  if (feedContentComparisonChartEl && feedContentComparison.labels && feedContentComparison.labels.length > 0) {
+    const feedContentComparisonChartConfig = {
+      chart: {
+        height: 300,
+        type: 'bar',
+        toolbar: { show: false }
+      },
+      series: [
+        {
+          name: 'Avg Views',
+          data: feedContentComparison.avg_views || []
+        },
+        {
+          name: 'Avg Engagement (%)',
+          data: feedContentComparison.avg_engagement || []
+        }
+      ],
+      xaxis: {
+        categories: feedContentComparison.labels || []
+      },
+      colors: ['#696cff', '#71dd37'],
+      plotOptions: {
+        bar: {
+          horizontal: false,
+          columnWidth: '60%',
+          endingShape: 'rounded'
+        }
+      },
+      dataLabels: {
+        enabled: true
+      },
+      legend: {
+        show: true,
+        position: 'top'
+      }
+    };
+    const feedContentComparisonChart = new ApexCharts(feedContentComparisonChartEl, feedContentComparisonChartConfig);
+    feedContentComparisonChart.render();
+  }
+</script>
+{% endblock page_js %}
+{% endblock %}
+

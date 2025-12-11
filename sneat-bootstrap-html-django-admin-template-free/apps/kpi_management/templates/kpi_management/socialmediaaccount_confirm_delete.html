@@ -1,0 +1,69 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Hapus Akun Sosial Media{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">Hapus Akun Sosial Media</h5>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-warning">
+          <h5 class="alert-heading mb-1">Apakah Anda yakin ingin menghapus akun ini?</h5>
+          <p class="mb-0">
+            <strong>{{ object.get_platform_display }} - {{ object.account_name }}</strong>
+          </p>
+          <p class="mb-0 mt-2">Tindakan ini tidak dapat dibatalkan. Semua data terkait akun ini akan dihapus.</p>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <h6>Informasi Akun:</h6>
+            <table class="table table-sm">
+              <tr>
+                <th>Platform:</th>
+                <td>{{ object.get_platform_display }}</td>
+              </tr>
+              <tr>
+                <th>Nama Akun:</th>
+                <td>{{ object.account_name }}</td>
+              </tr>
+              <tr>
+                <th>Status:</th>
+                <td>{{ object.get_status_display }}</td>
+              </tr>
+              {% if object.owner %}
+              <tr>
+                <th>Pemilik:</th>
+                <td>{{ object.owner.get_full_name|default:object.owner.username }}</td>
+              </tr>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div class="d-flex justify-content-end gap-2">
+            <a href="{% url 'kpi_management:socialmediaaccount-list' %}" class="btn btn-label-secondary">
+              <i class="icon-base bx bx-x me-1"></i> Batal
+            </a>
+            <button type="submit" class="btn btn-danger">
+              <i class="icon-base bx bx-trash me-1"></i> Ya, Hapus
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,145 @@
+{% load translation_tags %}
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+  <!-- ! Hide app brand if navbar-full -->
+  {% if not navbar_full %}
+  <div class="app-brand demo">
+    <a href="{% url 'index' %}" class="app-brand-link">
+      <span class="app-brand-logo demo">
+        {% include 'partials/logo.html'  %}
+      </span>
+      <span class="app-brand-text demo menu-text fw-bold ms-2">{% get_theme_variables 'template_name' %}</span>
+    </a>
+
+    <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
+      <i class="icon-base bx bx-chevron-left icon-sm d-flex align-items-center justify-content-center"></i>
+    </a>
+  </div>
+  {% endif %}
+
+
+  <div class="menu-inner-shadow"></div>
+
+  <ul class="menu-inner py-1">
+
+    <!-- Dashboard -->
+    <li class="menu-item {% if 'index' == request.resolver_match.url_name %}active{% endif %}">
+      <a href="{% url 'index' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-home-smile"></i>
+        <div class="text-truncate">{% translate 'Dashboard' %}</div>
+      </a>
+    </li>
+
+    <!-- Story -->
+    <li class="menu-item {% if '/kpi/stories/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:story-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-book-content"></i>
+        <div class="text-truncate">{% translate 'Story' %}</div>
+      </a>
+    </li>
+
+    <!-- Daily Feed/Reels -->
+    <li class="menu-item {% if '/kpi/daily-feeds/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:dailyfeedreels-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-video"></i>
+        <div class="text-truncate">{% translate 'Daily Feed/Reels' %}</div>
+      </a>
+    </li>
+
+    <!-- FYP Post Value -->
+    <li class="menu-item {% if '/kpi/fyp-posts/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:fyppostvalue-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-trending-up"></i>
+        <div class="text-truncate">{% translate 'FYP Post Value' %}</div>
+      </a>
+    </li>
+
+    <!-- Campaign -->
+    <li class="menu-item {% if '/kpi/campaigns/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:campaign-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-bullseye"></i>
+        <div class="text-truncate">{% translate 'Campaign' %}</div>
+      </a>
+    </li>
+
+    <!-- Collab Brand -->
+    <li class="menu-item {% if '/kpi/collab-brands/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:collabbrand-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-group"></i>
+        <div class="text-truncate">{% translate 'Collab Brand' %}</div>
+      </a>
+    </li>
+
+    <!-- Kelola Pengguna (User Management) - Only for Admin -->
+    {% if is_admin %}
+    <li class="menu-item {% if '/kpi/users/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:user-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-user"></i>
+        <div class="text-truncate">{% translate 'Kelola Pengguna' %}</div>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- Akun Sosial Media - Only for Admin -->
+    {% if is_admin %}
+    <li class="menu-item {% if '/kpi/social-media-accounts/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:socialmediaaccount-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-share-alt"></i>
+        <div class="text-truncate">{% translate 'Akun Sosial Media' %}</div>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- Pengaturan (System Settings) - Only for Admin -->
+    {% if is_admin %}
+    <li class="menu-item {% if '/kpi/settings/' in request.path %}active{% endif %}">
+      <a href="{% url 'kpi_management:settings-list' %}" class="menu-link">
+        <i class="menu-icon icon-base bx bx-cog"></i>
+        <div class="text-truncate">{% translate 'Pengaturan' %}</div>
+      </a>
+    </li>
+    {% endif %}
+
+    <!-- KPI Management -->
+    <li class="menu-item {% if '/kpi/dashboard/' in request.path or '/kpi/reports/' in request.path or '/kpi/audit-logs/' in request.path or '/kpi/fyp-leaderboard/' in request.path or '/kpi/calendar/' in request.path or '/kpi/profile/' in request.path %}active open{% endif %}">
+      <a href="javascript:void(0);" class="menu-link menu-toggle">
+        <i class="menu-icon icon-base bx bx-bar-chart-alt-2"></i>
+        <div class="text-truncate">{% translate 'KPI Management' %}</div>
+      </a>
+      <ul class="menu-sub">
+        <li class="menu-item {% if '/kpi/dashboard/' in request.path %}active{% endif %}">
+          <a href="{% url 'kpi_management:dashboard-management' %}" class="menu-link">
+            <div class="text-truncate">{% translate 'Dashboard Management' %}</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/kpi/reports/' in request.path %}active{% endif %}">
+          <a href="{% url 'kpi_management:report-list' %}" class="menu-link">
+            <div class="text-truncate">{% translate 'Report' %}</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/kpi/audit-logs/' in request.path %}active{% endif %}">
+          <a href="{% url 'kpi_management:auditlog-list' %}" class="menu-link">
+            <div class="text-truncate">{% translate 'Audit Log' %}</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/kpi/fyp-leaderboard/' in request.path %}active{% endif %}">
+          <a href="{% url 'kpi_management:fyp-leaderboard' %}" class="menu-link">
+            <div class="text-truncate">{% translate 'FYP Leaderboard' %}</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/kpi/calendar/' in request.path %}active{% endif %}">
+          <a href="{% url 'kpi_management:calendar-scheduling' %}" class="menu-link">
+            <div class="text-truncate">{% translate 'Calendar Scheduling' %}</div>
+          </a>
+        </li>
+        <li class="menu-item {% if '/kpi/profile/' in request.path %}active{% endif %}">
+          <a href="{% url 'kpi_management:profile-view' %}" class="menu-link">
+            <div class="text-truncate">{% translate 'Profile' %}</div>
+          </a>
+        </li>
+      </ul>
+    </li>
+
+  </ul>
+
+
+</aside>

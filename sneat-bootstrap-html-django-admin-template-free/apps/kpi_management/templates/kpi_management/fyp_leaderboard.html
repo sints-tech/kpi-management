@@ -1,0 +1,79 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}FYP Leaderboard{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="mb-0">FYP Leaderboard - Top Viral Content</h5>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Judul</th>
+                <th>Platform</th>
+                <th>Akun</th>
+                <th>FYP Views</th>
+                <th>Total Views</th>
+                <th>Viral Score</th>
+                <th>Tanggal</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for post in leaderboard %}
+              <tr>
+                <td>
+                  {% if forloop.counter == 1 %}
+                    <span class="badge bg-label-warning">🥇 #1</span>
+                  {% elif forloop.counter == 2 %}
+                    <span class="badge bg-label-secondary">🥈 #2</span>
+                  {% elif forloop.counter == 3 %}
+                    <span class="badge bg-label-info">🥉 #3</span>
+                  {% else %}
+                    <span class="badge bg-label-primary">#{{ forloop.counter }}</span>
+                  {% endif %}
+                </td>
+                <td><strong>{{ post.post_title }}</strong></td>
+                <td>
+                  <span class="badge bg-label-info">{{ post.get_platform_display }}</span>
+                </td>
+                <td>{{ post.account_name }}</td>
+                <td>{{ post.fyp_views|default:0 }}</td>
+                <td>{{ post.total_views|default:0 }}</td>
+                <td>
+                  <span class="badge bg-label-success">{{ post.viral_score|floatformat:2 }}</span>
+                </td>
+                <td>{{ post.post_date|date:"d M Y" }}</td>
+                <td>
+                  <a href="{% url 'kpi_management:fyppostvalue-detail' post.pk %}" class="btn btn-sm btn-outline-primary">
+                    <i class="icon-base bx bx-show me-1"></i> Detail
+                  </a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" class="text-center">Tidak ada data FYP post</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+

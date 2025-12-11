@@ -1,0 +1,102 @@
+{% load i18n %}
+{% load static %}
+{% load translation_tags %}
+
+
+<nav class="layout-navbar {{container_class}} navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme" id="layout-navbar">
+  {% if not navbar_hide_toggle %}
+  <div class="layout-menu-toggle navbar-nav align-items-xl-center me-4 me-xl-0 d-xl-none">
+    <a class="nav-item nav-link px-0 me-xl-6" href="javascript:void(0)">
+      <i class="icon-base bx bx-menu icon-md"></i>
+    </a>
+  </div>
+  {% endif %}
+  <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
+
+    <!-- Search -->
+    <div class="navbar-nav align-items-center">
+      <div class="nav-item d-flex align-items-center">
+        <i class="icon-base bx bx-search icon-22px"></i>
+        <input type="text" class="form-control border-0 shadow-none ps-1 ps-sm-2" placeholder="{% translate 'Search...' language %}" aria-label="{% translate 'Search...' language %}">
+      </div>
+    </div>
+    <!-- /Search -->
+
+    <ul class="navbar-nav flex-row align-items-center ms-auto">
+      <!-- Real-time Clock -->
+      <li class="nav-item lh-1 me-4">
+        <div class="nav-link d-flex align-items-center" id="realtime-clock" style="cursor: default;">
+          <i class="icon-base bx bx-time-five icon-md me-2"></i>
+          <span id="clock-time" class="fw-medium"></span>
+          <span id="clock-date" class="ms-2 small text-body-secondary"></span>
+        </div>
+      </li>
+
+      <!-- Theme Toggle -->
+      {% if is_admin %}
+      <li class="nav-item lh-1 me-4">
+        <a class="nav-link" href="{% url 'kpi_management:settings-theme' %}" title="{% translate 'Pengaturan Tema' language %}">
+          <i class="icon-base bx bx-palette icon-md"></i>
+        </a>
+      </li>
+      {% endif %}
+
+      <!-- User -->
+      <li class="nav-item navbar-dropdown dropdown-user dropdown">
+        <a class="nav-link dropdown-toggle hide-arrow p-0" href="javascript:void(0);" data-bs-toggle="dropdown">
+          <div class="avatar avatar-online">
+            {% if request.user.is_authenticated and request.user.profile.avatar %}
+            <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+            {% else %}
+            <img src="{% static 'img/avatars/1.png' %}" alt class="rounded-circle" />
+            {% endif %}
+          </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item" href="{% url 'kpi_management:profile-view' %}">
+              <div class="d-flex">
+                <div class="flex-shrink-0 me-3">
+                  <div class="avatar avatar-online">
+                    {% if request.user.is_authenticated and request.user.profile.avatar %}
+                    <img src="{{ request.user.profile.avatar.url }}" alt="{{ request.user.username }}" class="w-px-40 h-auto rounded-circle" style="width: 40px; height: 40px; object-fit: cover;" />
+                    {% else %}
+                    <img src="{% static 'img/avatars/1.png' %}" alt class="w-px-40 h-auto rounded-circle" />
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="flex-grow-1">
+                  <h6 class="mb-0">{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Guest{% endif %}</h6>
+                  <small class="text-body-secondary">{% if request.user.is_authenticated and request.user.profile.role %}{{ request.user.profile.role|title }}{% else %}User{% endif %}</small>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li>
+            <div class="dropdown-divider my-1"></div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'kpi_management:profile-view' %}"> <i class="icon-base bx bx-user icon-md me-3"></i><span>{% translate 'My Profile' language %}</span> </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'kpi_management:settings-list' %}"> <i class="icon-base bx bx-cog icon-md me-3"></i><span>{% translate 'Settings' language %}</span> </a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'kpi_management:dashboard-management' %}">
+              <span class="d-flex align-items-center align-middle">
+                <i class="flex-shrink-0 icon-base bx bx-bar-chart icon-md me-3"></i><span class="flex-grow-1 align-middle">{% translate 'Dashboard KPI' language %}</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <div class="dropdown-divider my-1"></div>
+          </li>
+          <li>
+            <a class="dropdown-item" href="{% url 'auth-login-basic' %}"> <i class="icon-base bx bx-power-off icon-md me-3"></i><span>{% translate 'Log Out' language %}</span> </a>
+          </li>
+        </ul>
+      </li>
+      <!--/ User -->
+    </ul>
+  </div>
+</nav>

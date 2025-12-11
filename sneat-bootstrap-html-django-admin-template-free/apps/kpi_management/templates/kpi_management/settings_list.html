@@ -1,0 +1,176 @@
+{% extends layout_path %}
+{% load static %}
+{% load i18n %}
+
+{% block title %}Pengaturan Sistem{% endblock %}
+
+{% block page_css %}
+{% include 'kpi_management/_dark_mode_css.html' %}
+{% endblock page_css %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Pengaturan Sistem</h5>
+        <div class="d-flex gap-2">
+          <a href="{% url 'kpi_management:settings-theme' %}" class="btn btn-outline-primary">
+            <i class="icon-base bx bx-palette me-1"></i> Tema
+          </a>
+          <a href="{% url 'kpi_management:settings-language' %}" class="btn btn-outline-info">
+            <i class="icon-base bx bx-globe me-1"></i> Bahasa
+          </a>
+          <a href="{% url 'kpi_management:settings-create' %}" class="btn btn-primary">
+            <i class="icon-base bx bx-plus me-1"></i> Tambah Pengaturan
+          </a>
+        </div>
+      </div>
+      <div class="card-body">
+        <!-- Search and Filter Form -->
+        <form method="get" class="mb-4">
+          <div class="row g-3">
+            <div class="col-md-4">
+              <input type="text" name="search" class="form-control" placeholder="Cari nama, label, atau deskripsi..." value="{{ request.GET.search }}">
+            </div>
+            <div class="col-md-3">
+              <select name="type" class="form-select">
+                <option value="">Semua Tipe</option>
+                {% for type_code, type_label in setting_types %}
+                  <option value="{{ type_code }}" {% if request.GET.type == type_code %}selected{% endif %}>
+                    {{ type_label }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button type="submit" class="btn btn-primary w-100">
+                <i class="icon-base bx bx-search me-1"></i> Cari
+              </button>
+            </div>
+            <div class="col-md-3">
+              <a href="{% url 'kpi_management:settings-list' %}" class="btn btn-label-secondary w-100">
+                <i class="icon-base bx bx-refresh me-1"></i> Reset
+              </a>
+            </div>
+          </div>
+        </form>
+
+        <!-- Settings Table -->
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>Nama</th>
+                <th>Label</th>
+                <th>Tipe</th>
+                <th>Nilai</th>
+                <th>Status</th>
+                <th>Diperbarui</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for setting in settings_list %}
+                <tr>
+                  <td><strong>{{ setting.name }}</strong></td>
+                  <td>{{ setting.label }}</td>
+                  <td>
+                    <span class="badge bg-label-info">{{ setting.get_setting_type_display }}</span>
+                  </td>
+                  <td>
+                    {% if setting.value_type == 'boolean' %}
+                      <span class="badge bg-label-{% if setting.get_value %}success{% else %}secondary{% endif %}">
+                        {{ setting.get_value|yesno:"Aktif,Nonaktif" }}
+                      </span>
+                    {% elif setting.value_type == 'json' %}
+                      <code class="text-truncate d-inline-block" style="max-width: 200px;">{{ setting.value|truncatechars:50 }}</code>
+                    {% else %}
+                      <span class="text-truncate d-inline-block" style="max-width: 200px;">{{ setting.value|truncatechars:50|default:"-" }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if setting.is_active %}
+                      <span class="badge bg-label-success">Aktif</span>
+                    {% else %}
+                      <span class="badge bg-label-danger">Nonaktif</span>
+                    {% endif %}
+                    {% if setting.is_public %}
+                      <span class="badge bg-label-primary ms-1">Public</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ setting.updated_at|date:"d M Y H:i" }}</td>
+                  <td>
+                    <div class="dropdown">
+                      <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                        <i class="icon-base bx bx-dots-vertical-rounded"></i>
+                      </button>
+                      <div class="dropdown-menu">
+                        <a class="dropdown-item" href="{% url 'kpi_management:settings-detail' setting.pk %}">
+                          <i class="icon-base bx bx-show me-1"></i> Detail
+                        </a>
+                        <a class="dropdown-item" href="{% url 'kpi_management:settings-update' setting.pk %}">
+                          <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+                        </a>
+                        <a class="dropdown-item text-danger" href="{% url 'kpi_management:settings-delete' setting.pk %}">
+                          <i class="icon-base bx bx-trash me-1"></i> Hapus
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center py-4">
+                    <p class="text-muted mb-0">Tidak ada pengaturan ditemukan.</p>
+                    <a href="{% url 'kpi_management:settings-create' %}" class="btn btn-primary btn-sm mt-2">
+                      <i class="icon-base bx bx-plus me-1"></i> Tambah Pengaturan Pertama
+                    </a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+          <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+              {% if page_obj.has_previous %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                    <i class="icon-base bx bx-chevron-left"></i>
+                  </a>
+                </li>
+              {% endif %}
+
+              {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                  <li class="page-item active">
+                    <span class="page-link">{{ num }}</span>
+                  </li>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                  <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">{{ num }}</a>
+                  </li>
+                {% endif %}
+              {% endfor %}
+
+              {% if page_obj.has_next %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.type %}&type={{ request.GET.type }}{% endif %}">
+                    <i class="icon-base bx bx-chevron-right"></i>
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </nav>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
