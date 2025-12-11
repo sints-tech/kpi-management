@@ -253,12 +253,21 @@ class DashboardsView(TemplateView):
 
     def dispatch(self, request, *args, **kwargs):
         """Override dispatch untuk error handling yang lebih baik"""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"DashboardsView.dispatch called for path: {request.path}")
         try:
-            return super().dispatch(request, *args, **kwargs)
+            response = super().dispatch(request, *args, **kwargs)
+            logger.info(f"DashboardsView.dispatch success, status: {response.status_code}")
+            return response
         except Exception as e:
-            # Log error tapi tetap return response yang valid
-            import logging
-            logger = logging.getLogger(__name__)
+            # Log error dengan detail
             logger.error(f"Error in DashboardsView.dispatch: {e}", exc_info=True)
-            # Jangan raise exception, biarkan super().dispatch handle
-            return super().dispatch(request, *args, **kwargs)
+            # Return error response langsung, jangan raise exception lagi
+            from django.http import HttpResponseServerError
+            from django.template import loader
+            try:
+                template = loader.get_template('pages_misc_error.html')
+                return HttpResponseServerError(template.render({'status': 500}, request))
+            except Exception:
+                return HttpResponseServerError("Internal server error in DashboardsView. Please check logs.")
