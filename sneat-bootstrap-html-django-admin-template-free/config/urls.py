@@ -20,12 +20,27 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from web_project.views import SystemView
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Try to include dashboards.urls with error handling
+try:
+    dashboard_urls = include("apps.dashboards.urls")
+except Exception as e:
+    logger.error(f"Error including dashboards.urls: {e}", exc_info=True)
+    # Fallback: create a simple view directly
+    from django.views.generic import TemplateView
+    from django.http import HttpResponse
+    def index_fallback(request):
+        return HttpResponse("Dashboard routing error. Please check logs.", status=500)
+    dashboard_urls = [path("", index_fallback, name="index")]
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    # Dashboard urls
-    path("", include("apps.dashboards.urls")),
+    # Dashboard urls - IMPORTANT: This must be first to catch root URL
+    path("", dashboard_urls),
 
     # layouts urls
     path("", include("apps.layouts.urls")),
