@@ -21,9 +21,25 @@ from django.conf import settings
 from django.conf.urls.static import static
 from web_project.views import SystemView
 
+# Debug imports (HAPUS setelah production stabil!)
+try:
+    from apps.dashboards.views_debug import HealthCheckView, RunMigrationsView
+    DEBUG_ENABLED = True
+except ImportError:
+    DEBUG_ENABLED = False
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+]
 
+# Add debug endpoints if available
+if DEBUG_ENABLED:
+    urlpatterns += [
+        path("health/", HealthCheckView.as_view(), name="health-check"),
+        path("run-migrations/", RunMigrationsView.as_view(), name="run-migrations"),
+    ]
+
+urlpatterns += [
     # Dashboard urls
     path("", include("apps.dashboards.urls")),
 

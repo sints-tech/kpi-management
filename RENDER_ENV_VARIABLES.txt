@@ -1,0 +1,8 @@
+SECRET_KEY=ZCGObm1yxilkE5IyR7bzXp4la9LbseVup9EnHnQkU9szuDUdZ1f0xYzfgmFWyUlEvdo
+DEBUG=False
+DJANGO_ENVIRONMENT=production
+ALLOWED_HOSTS=your-app-name.onrender.com,localhost,127.0.0.1
+DATABASE_URL=GANTI_DENGAN_DATABASE_URL_DARI_POSTGRESQL
+BASE_URL=https://your-app-name.onrender.com
+TIME_ZONE=Asia/Jakarta
+
