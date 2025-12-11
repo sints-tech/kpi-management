@@ -16,15 +16,35 @@ Refer to auth/urls.py file for more pages.
 class AuthView(TemplateView):
     # Predefined function
     def get_context_data(self, **kwargs):
+        # Initialize basic context first dengan error handling
+        try:
+            context = super().get_context_data(**kwargs)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in super().get_context_data: {e}", exc_info=True)
+            context = {}
+        
         # A function to init the global layout. It is defined in web_project/__init__.py file
-        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        try:
+            context = TemplateLayout.init(self, context)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"TemplateLayout.init failed: {e}")
+            if 'layout_path' not in context:
+                context['layout_path'] = 'layout/layout_blank.html'
 
         # Update the context
-        context.update(
-            {
-                "layout_path": TemplateHelper.set_layout("layout_blank.html", context),
-            }
-        )
+        try:
+            layout_path = TemplateHelper.set_layout("layout_blank.html", context)
+            context.update({"layout_path": layout_path})
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"TemplateHelper.set_layout failed: {e}")
+            if 'layout_path' not in context:
+                context['layout_path'] = 'layout/layout_blank.html'
 
         return context
     
