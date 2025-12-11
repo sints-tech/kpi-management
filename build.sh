@@ -121,8 +121,31 @@ if [ -d "staticfiles" ] && [ "$(ls -A staticfiles 2>/dev/null)" ]; then
         ls -la staticfiles/ || echo "Directory does not exist"
         echo "📂 Checking if vendor exists in source:"
         ls -la src/assets/vendor/ 2>/dev/null || echo "src/assets/vendor does not exist"
-        echo "⚠️  This will cause static files to fail loading!"
-        echo "⚠️  Build will continue but application may not work correctly."
+        
+        # Try to manually copy vendor files if they exist but weren't collected
+        if [ -d "src/assets/vendor" ]; then
+            echo "🔧 Attempting to manually copy vendor files..."
+            mkdir -p staticfiles/vendor
+            cp -r src/assets/vendor/* staticfiles/vendor/ 2>/dev/null || {
+                echo "⚠️  Manual copy failed, trying alternative method..."
+                # Try with find and cp
+                find src/assets/vendor -type f -exec cp --parents {} staticfiles/ \; 2>/dev/null || {
+                    echo "❌ Manual copy also failed!"
+                }
+            }
+            
+            # Verify manual copy worked
+            if [ -d "staticfiles/vendor" ] && [ "$(ls -A staticfiles/vendor 2>/dev/null)" ]; then
+                echo "✅ Vendor files manually copied successfully!"
+                echo "📊 Vendor files count after manual copy: $(find staticfiles/vendor -type f | wc -l)"
+            else
+                echo "❌ Manual copy failed! Vendor files still missing!"
+                echo "⚠️  This will cause static files to fail loading!"
+            fi
+        else
+            echo "❌ Vendor source directory not found! Cannot copy manually."
+            echo "⚠️  This will cause static files to fail loading!"
+        fi
     fi
 else
     echo "❌ ERROR: Static files directory is empty or does not exist!"
