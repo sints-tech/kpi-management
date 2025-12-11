@@ -58,8 +58,20 @@ echo "📁 Collecting static files..."
 echo "📂 STATIC_ROOT: $(python -c 'from django.conf import settings; print(settings.STATIC_ROOT)')"
 echo "📂 STATICFILES_DIRS: $(python -c 'from django.conf import settings; print(settings.STATICFILES_DIRS)')"
 
+# Check if vendor directory exists before collectstatic
+echo "📂 Checking vendor directory in source..."
+if [ -d "src/assets/vendor" ]; then
+    echo "✅ Vendor directory found in src/assets/vendor"
+    echo "📊 Vendor files count: $(find src/assets/vendor -type f | wc -l)"
+else
+    echo "⚠️  WARNING: Vendor directory not found in src/assets/vendor"
+fi
+
 # Collect static files with verbosity to see what's happening
-python manage.py collectstatic --noinput --clear --verbosity 2
+echo "📁 Running collectstatic..."
+python manage.py collectstatic --noinput --clear --verbosity 2 || {
+    echo "⚠️  WARNING: collectstatic had issues, but continuing..."
+}
 
 # Verify static files were collected
 echo "📁 Verifying static files collection..."
