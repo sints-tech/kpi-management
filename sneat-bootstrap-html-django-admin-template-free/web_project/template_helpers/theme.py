@@ -35,28 +35,41 @@ class TemplateHelper:
     # Set the current page layout and init the layout bootstrap file
     @staticmethod
     def set_layout(view, context={}):
-        # Extract layout from the view path
-        layout = os.path.splitext(view)[0].split("/")[0]
+        try:
+            # Extract layout from the view path
+            layout = os.path.splitext(view)[0].split("/")[0]
 
-        # Get module path
-        module = f"templates.{settings.THEME_LAYOUT_DIR.replace('/', '.')}.bootstrap.{layout}"
+            # Get module path
+            module = f"templates.{settings.THEME_LAYOUT_DIR.replace('/', '.')}.bootstrap.{layout}"
 
-        # Check if the bootstrap file is exist
-        if util.find_spec(module) is not None:
-            # Auto import and init the default bootstrap.py file from the theme
-            TemplateBootstrap = TemplateHelper.import_class(
-                module, f"TemplateBootstrap{layout.title().replace('_', '')}"
-            )
-            TemplateBootstrap.init(context)
-        else:
-            module = f"templates.{settings.THEME_LAYOUT_DIR.replace('/', '.')}.bootstrap.default"
+            # Check if the bootstrap file is exist
+            if util.find_spec(module) is not None:
+                # Auto import and init the default bootstrap.py file from the theme
+                TemplateBootstrap = TemplateHelper.import_class(
+                    module, f"TemplateBootstrap{layout.title().replace('_', '')}"
+                )
+                if TemplateBootstrap:
+                    TemplateBootstrap.init(context)
+            else:
+                module = f"templates.{settings.THEME_LAYOUT_DIR.replace('/', '.')}.bootstrap.default"
+                try:
+                    TemplateBootstrap = TemplateHelper.import_class(
+                        module, "TemplateBootstrapDefault"
+                    )
+                    if TemplateBootstrap:
+                        TemplateBootstrap.init(context)
+                except Exception:
+                    # Jika default juga gagal, skip init
+                    pass
 
-            TemplateBootstrap = TemplateHelper.import_class(
-                module, "TemplateBootstrapDefault"
-            )
-            TemplateBootstrap.init(context)
-
-        return f"{settings.THEME_LAYOUT_DIR}/{view}"
+            return f"{settings.THEME_LAYOUT_DIR}/{view}"
+        except Exception as e:
+            # Jika ada error, return path default
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in TemplateHelper.set_layout: {e}", exc_info=True)
+            # Return default path
+            return f"{settings.THEME_LAYOUT_DIR}/{view}"
 
     # Import a module by string
     @staticmethod

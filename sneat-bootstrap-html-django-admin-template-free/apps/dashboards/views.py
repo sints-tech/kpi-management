@@ -11,19 +11,30 @@ Refer to dashboards/urls.py file for more pages.
 
 
 class DashboardsView(TemplateView):
+    template_name = "dashboard_kpi.html"
+    
     # Predefined function
     def get_context_data(self, **kwargs):
+        # Initialize basic context first
+        try:
+            context = super().get_context_data(**kwargs)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in super().get_context_data: {e}", exc_info=True)
+            context = {}
+        
         # A function to init the global layout. It is defined in web_project/__init__.py file
         try:
-            context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+            context = TemplateLayout.init(self, context)
         except Exception as e:
             # Fallback jika TemplateLayout.init gagal
             import logging
             logger = logging.getLogger(__name__)
             logger.warning(f"TemplateLayout.init failed: {e}")
-            context = super().get_context_data(**kwargs)
             # Set minimal layout path
-            context['layout_path'] = 'layout/layout_vertical.html'
+            if 'layout_path' not in context:
+                context['layout_path'] = 'layout/layout_vertical.html'
 
         # Add KPI statistics dengan error handling
         from apps.kpi_management.models import Story, DailyFeedReels, Campaign, CollabBrand, FYPPostValue
