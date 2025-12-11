@@ -20,6 +20,9 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from web_project.views import SystemView
+import logging
+
+logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -37,6 +40,13 @@ except ImportError as e:
     import logging
     logger = logging.getLogger(__name__)
     logger.warning(f"Debug views not available: {e}")
+
+# Import authentication URLs module to verify it loads correctly
+try:
+    from apps.authentication import urls as auth_urls
+    logger.info("Successfully imported apps.authentication.urls")
+except Exception as e:
+    logger.error(f"Failed to import apps.authentication.urls: {e}", exc_info=True)
 
 urlpatterns += [
     # Auth urls - IMPORTANT: Put auth URLs first to ensure they are matched before other patterns
@@ -75,6 +85,8 @@ urlpatterns += [
     # KPI Management urls
     path("kpi/", include("apps.kpi_management.urls")),
 ]
+
+logger.info(f"Total URL patterns registered: {len(urlpatterns)}")
 
 # Serve media files in development
 if settings.DEBUG:
