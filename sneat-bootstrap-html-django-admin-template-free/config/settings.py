@@ -199,9 +199,15 @@ STATICFILES_DIRS = [
     BASE_DIR / "src" / "assets",
 ]
 
-# WhiteNoise configuration for static files in production
-# Using CompressedStaticFilesStorage for better compatibility (manifest files can cause issues)
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# WhiteNoise Configuration untuk Production
+# Gunakan StaticFilesStorage agar WhiteNoise bisa melayani file langsung dari STATICFILES_DIRS
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+# Konfigurasi WhiteNoise - Aktifkan finders untuk fallback ke STATICFILES_DIRS
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = False
+WHITENOISE_INDEX_FILE = False
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"

@@ -14,7 +14,11 @@ class DashboardsView(TemplateView):
     # Predefined function
     def get_context_data(self, **kwargs):
         # A function to init the global layout. It is defined in web_project/__init__.py file
-        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        try:
+            context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        except Exception as e:
+            # Fallback jika TemplateLayout.init gagal
+            context = super().get_context_data(**kwargs)
 
         # Add KPI statistics dengan error handling
         from apps.kpi_management.models import Story, DailyFeedReels, Campaign, CollabBrand, FYPPostValue
@@ -204,8 +208,14 @@ class DashboardsView(TemplateView):
         except Exception:
             is_admin = False
 
+        try:
+            layout_path = TemplateHelper.set_layout("layout_vertical.html", context)
+        except Exception:
+            # Fallback jika TemplateHelper gagal
+            layout_path = "layout/layout_vertical.html"
+
         context.update({
-            "layout_path": TemplateHelper.set_layout("layout_vertical.html", context),
+            "layout_path": layout_path,
             "total_stories": total_stories,
             "total_feeds": total_feeds,
             "total_campaigns": total_campaigns,
