@@ -239,3 +239,15 @@ class DashboardsView(TemplateView):
         })
 
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        """Override dispatch untuk error handling yang lebih baik"""
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except Exception as e:
+            # Log error tapi tetap return response yang valid
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Error in DashboardsView.dispatch: {e}", exc_info=True)
+            # Jangan raise exception, biarkan super().dispatch handle
+            return super().dispatch(request, *args, **kwargs)
