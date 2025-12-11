@@ -196,10 +196,10 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # Konfigurasi WhiteNoise
-# Jika STATIC_ROOT kosong atau tidak ada file, gunakan finders sebagai fallback
-STATIC_ROOT_EXISTS = STATIC_ROOT.exists() and any(STATIC_ROOT.iterdir()) if STATIC_ROOT.exists() else False
-WHITENOISE_USE_FINDERS = not STATIC_ROOT_EXISTS if not DEBUG else False  # Gunakan finders jika STATIC_ROOT kosong
-WHITENOISE_AUTOREFRESH = False  # Jangan auto-refresh di production
+# Aktifkan USE_FINDERS untuk memastikan static files bisa dilayani dari STATICFILES_DIRS
+# jika STATIC_ROOT kosong atau file belum di-collect
+WHITENOISE_USE_FINDERS = True  # Aktifkan finders - WhiteNoise akan mencari di STATICFILES_DIRS jika file tidak ada di STATIC_ROOT
+WHITENOISE_AUTOREFRESH = False  # Jangan auto-refresh di production (untuk performance)
 WHITENOISE_INDEX_FILE = False  # Jangan serve index files
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
 
