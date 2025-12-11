@@ -58,30 +58,24 @@ echo "📁 Collecting static files..."
 echo "📂 STATIC_ROOT: $(python -c 'from django.conf import settings; print(settings.STATIC_ROOT)')"
 echo "📂 STATICFILES_DIRS: $(python -c 'from django.conf import settings; print(settings.STATICFILES_DIRS)')"
 
-# Check if vendor directory exists before collectstatic
-echo "📂 Checking vendor directory in source..."
+# Verify vendor files exist before collectstatic
+echo "🔍 Checking for vendor files..."
 if [ -d "src/assets/vendor" ]; then
-    echo "✅ Vendor directory found in src/assets/vendor"
+    echo "✅ Vendor directory found at src/assets/vendor"
     echo "📊 Vendor files count: $(find src/assets/vendor -type f | wc -l)"
+    echo "📂 Sample vendor files:"
+    find src/assets/vendor -type f | head -5
 else
-    echo "⚠️  WARNING: Vendor directory not found in src/assets/vendor"
+    echo "⚠️  WARNING: Vendor directory not found at src/assets/vendor!"
+    echo "📂 Listing src/assets directory:"
+    ls -la src/assets/ || echo "src/assets directory does not exist"
 fi
 
 # Collect static files with verbosity to see what's happening
-echo "📁 Running collectstatic..."
+echo "📦 Running collectstatic..."
 python manage.py collectstatic --noinput --clear --verbosity 2 || {
-    echo "⚠️  WARNING: collectstatic had issues, but continuing..."
+    echo "⚠️  collectstatic had warnings, but continuing..."
 }
-
-# Manually ensure vendor files are copied if they exist in source but not in staticfiles
-if [ -d "src/assets/vendor" ] && [ ! -d "staticfiles/vendor" ]; then
-    echo "📁 Vendor files not collected by collectstatic, copying manually..."
-    mkdir -p staticfiles/vendor
-    cp -r src/assets/vendor/* staticfiles/vendor/ 2>/dev/null || {
-        echo "⚠️  WARNING: Failed to copy vendor files manually"
-    }
-    echo "✅ Vendor files copied manually"
-fi
 
 # Verify static files were collected
 echo "📁 Verifying static files collection..."
@@ -90,26 +84,20 @@ if [ -d "staticfiles" ] && [ "$(ls -A staticfiles 2>/dev/null)" ]; then
     echo "📊 Static files count: $(find staticfiles -type f | wc -l)"
     echo "📂 Sample files in staticfiles:"
     find staticfiles -type f | head -10
-    echo "📂 All directories in staticfiles:"
-    find staticfiles -type d | head -20
     # Check if vendor directory exists (critical for the app)
     if [ -d "staticfiles/vendor" ]; then
-        echo "✅ Vendor directory exists!"
+        echo "✅ Vendor directory exists in staticfiles!"
         echo "📊 Vendor files count: $(find staticfiles/vendor -type f | wc -l)"
-        echo "📂 Sample vendor files:"
-        find staticfiles/vendor -type f | head -10
+        echo "📂 Sample vendor files in staticfiles:"
+        find staticfiles/vendor -type f | head -5
     else
-        echo "⚠️  WARNING: Vendor directory not found in staticfiles!"
+        echo "❌ CRITICAL ERROR: Vendor directory not found in staticfiles!"
+        echo "📂 Listing staticfiles directory structure:"
+        ls -la staticfiles/ || echo "Directory does not exist"
         echo "📂 Checking if vendor exists in source:"
-        if [ -d "src/assets/vendor" ]; then
-            echo "✅ Vendor directory exists in src/assets/vendor"
-            echo "📊 Vendor files in source: $(find src/assets/vendor -type f | wc -l)"
-            echo "📂 Sample vendor files in source:"
-            find src/assets/vendor -type f | head -10
-        else
-            echo "❌ Vendor directory not found in src/assets/vendor either!"
-        fi
-        echo "⚠️  Continuing build despite missing vendor files (will use USE_FINDERS fallback)"
+        ls -la src/assets/vendor/ 2>/dev/null || echo "src/assets/vendor does not exist"
+        echo "⚠️  This will cause static files to fail loading!"
+        echo "⚠️  Build will continue but application may not work correctly."
     fi
 else
     echo "❌ ERROR: Static files directory is empty or does not exist!"
