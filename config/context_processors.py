@@ -14,30 +14,41 @@ def environment(request):
 # Add is_admin to context for menu
 def kpi_context(request):
     is_admin = False
-    if request.user.is_authenticated:
-        try:
-            from apps.kpi_management.models import Profile
-            # Use select_related to avoid extra queries
-            profile = Profile.objects.select_related('user').filter(user=request.user).first()
-            if profile:
-                # Check if profile has is_admin property
-                try:
-                    is_admin = profile.is_admin
-                except (AttributeError, Exception):
-                    # Fallback: check role field directly
-                    is_admin = getattr(profile, 'role', 'user') == 'admin'
-        except Exception as e:
-            # Log error but don't break the page
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.debug(f"Error in kpi_context: {e}")
-            pass
+    # Check if request.user exists and is authenticated (safe check)
+    try:
+        if hasattr(request, 'user') and hasattr(request.user, 'is_authenticated') and request.user.is_authenticated:
+            try:
+                from apps.kpi_management.models import Profile
+                # Use select_related to avoid extra queries
+                profile = Profile.objects.select_related('user').filter(user=request.user).first()
+                if profile:
+                    # Check if profile has is_admin property
+                    try:
+                        is_admin = profile.is_admin
+                    except (AttributeError, Exception):
+                        # Fallback: check role field directly
+                        is_admin = getattr(profile, 'role', 'user') == 'admin'
+            except Exception as e:
+                # Log error but don't break the page
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.debug(f"Error in kpi_context: {e}")
+                pass
+    except Exception:
+        # If request.user doesn't exist or any other error, just continue with defaults
+        pass
 
-    # Get theme from session
-    theme = request.session.get('theme', 'light')
+    # Get theme from session (safe access)
+    try:
+        theme = request.session.get('theme', 'light')
+    except Exception:
+        theme = 'light'
 
-    # Get language from session
-    language = request.session.get('language', 'id')
+    # Get language from session (safe access)
+    try:
+        language = request.session.get('language', 'id')
+    except Exception:
+        language = 'id'
     
     # Get translation dictionary for current language
     translations = TRANSLATIONS.get(language, TRANSLATIONS['id'])
