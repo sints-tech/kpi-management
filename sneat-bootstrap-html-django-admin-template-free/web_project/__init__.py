@@ -14,16 +14,25 @@ class TemplateLayout:
         # Set a default layout globally using settings.py. Can be set in the page level view file as well.
         layout = "vertical"
 
-        # Set the selected layout
-        context.update(
-            {
-                "layout_path": TemplateHelper.set_layout(
-                    "layout_" + layout + ".html", context
-                ),
-            }
-        )
+        # Set the selected layout dengan error handling
+        try:
+            layout_path = TemplateHelper.set_layout(
+                "layout_" + layout + ".html", context
+            )
+            context.update({"layout_path": layout_path})
+        except Exception as e:
+            # Fallback jika set_layout gagal
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"TemplateHelper.set_layout failed: {e}")
+            context['layout_path'] = 'layout/layout_vertical.html'
 
-        # Map context variables
-        TemplateHelper.map_context(context)
+        # Map context variables dengan error handling
+        try:
+            TemplateHelper.map_context(context)
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"TemplateHelper.map_context failed: {e}")
 
         return context
