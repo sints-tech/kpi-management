@@ -41,7 +41,10 @@ DEBUG = os.environ.get("DEBUG", 'True').lower() in ['true', 'yes', '1']
 
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,0.0.0.0,127.0.0.1").split(",")
+ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "localhost,0.0.0.0,127.0.0.1").split(",") if host.strip()]
+
+# CSRF Trusted Origins for production
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
 
 # Current DJANGO_ENVIRONMENT
 ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
@@ -192,14 +195,17 @@ STATICFILES_DIRS = [
 
 # WhiteNoise Configuration untuk Production
 # https://whitenoise.readthedocs.io/en/latest/django.html
-# Gunakan storage bawaan agar WhiteNoise bisa melayani file langsung dari STATICFILES_DIRS
-# tanpa bergantung pada hasil collectstatic (aman untuk fallback di Render free tier)
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+# Gunakan WhiteNoise storage untuk production agar file di-compress dan di-cache dengan benar
+if not DEBUG:
+    # Gunakan CompressedStaticFilesStorage untuk production (lebih sederhana dari CompressedManifestStaticFilesStorage)
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+else:
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Konfigurasi WhiteNoise
 # Aktifkan finders supaya WhiteNoise mencari file di STATICFILES_DIRS jika STATIC_ROOT kosong
 WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = False
+WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh hanya di development
 WHITENOISE_INDEX_FILE = False
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
