@@ -42,32 +42,46 @@ DEBUG = os.environ.get("DEBUG", 'True').lower() in ['true', 'yes', '1']
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 # Default ALLOWED_HOSTS includes Render.com domain
+# IMPORTANT: Always include Render.com domain even if ALLOWED_HOSTS env var is set
 ALLOWED_HOSTS_ENV = os.environ.get("ALLOWED_HOSTS")
 if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",") if host.strip()]
 else:
-    # Default hosts including Render.com domain
-    # NOTE: Django supports wildcards in ALLOWED_HOSTS (e.g., ".onrender.com")
-    ALLOWED_HOSTS = [
-        "localhost",
-        "0.0.0.0",
-        "127.0.0.1",
-        "kpi-management-creative.onrender.com",  # Render.com domain
-        ".onrender.com",  # Allow all Render.com subdomains (wildcard supported here)
-    ]
+    ALLOWED_HOSTS = []
+
+# Always add default hosts and Render.com domain (even if env var was set)
+DEFAULT_HOSTS = [
+    "localhost",
+    "0.0.0.0",
+    "127.0.0.1",
+    "kpi-management-creative.onrender.com",  # Render.com domain
+    ".onrender.com",  # Allow all Render.com subdomains (wildcard supported here)
+]
+
+# Add default hosts if not already present
+for host in DEFAULT_HOSTS:
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
 
 # CSRF Trusted Origins for production
 # Default CSRF_TRUSTED_ORIGINS includes Render.com domain
 # NOTE: Django does NOT support wildcards in CSRF_TRUSTED_ORIGINS, must specify exact domains
+# IMPORTANT: Always include Render.com domain even if CSRF_TRUSTED_ORIGINS env var is set
 CSRF_TRUSTED_ORIGINS_ENV = os.environ.get("CSRF_TRUSTED_ORIGINS")
 if CSRF_TRUSTED_ORIGINS_ENV:
     CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(",") if origin.strip()]
 else:
-    # Default CSRF trusted origins for Render.com
-    # Must specify exact domains, no wildcards allowed
-    CSRF_TRUSTED_ORIGINS = [
-        "https://kpi-management-creative.onrender.com",
-    ]
+    CSRF_TRUSTED_ORIGINS = []
+
+# Always add default Render.com origin (even if env var was set)
+DEFAULT_ORIGINS = [
+    "https://kpi-management-creative.onrender.com",
+]
+
+# Add default origins if not already present
+for origin in DEFAULT_ORIGINS:
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
 
 # Current DJANGO_ENVIRONMENT
 ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
