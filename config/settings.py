@@ -192,16 +192,16 @@ STATICFILES_DIRS = [
 
 # WhiteNoise Configuration untuk Production
 # https://whitenoise.readthedocs.io/en/latest/django.html
-# Gunakan CompressedStaticFilesStorage (lebih sederhana, tidak perlu manifest)
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# Gunakan storage bawaan agar WhiteNoise bisa melayani file langsung dari STATICFILES_DIRS
+# tanpa bergantung pada hasil collectstatic (aman untuk fallback di Render free tier)
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Konfigurasi WhiteNoise
-# Aktifkan USE_FINDERS untuk memastikan static files bisa dilayani dari STATICFILES_DIRS
-# jika STATIC_ROOT kosong atau file belum di-collect
-WHITENOISE_USE_FINDERS = True  # Aktifkan finders - WhiteNoise akan mencari di STATICFILES_DIRS jika file tidak ada di STATIC_ROOT
-WHITENOISE_AUTOREFRESH = False  # Jangan auto-refresh di production (untuk performance)
-WHITENOISE_INDEX_FILE = False  # Jangan serve index files
-WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
+# Aktifkan finders supaya WhiteNoise mencari file di STATICFILES_DIRS jika STATIC_ROOT kosong
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = False
+WHITENOISE_INDEX_FILE = False
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"
