@@ -50,11 +50,15 @@ try:
 except Exception as e:
     logger.error(f"Failed to import apps.authentication.urls: {e}", exc_info=True)
 
+# IMPORTANT: Order matters! More specific patterns should come first
 urlpatterns += [
-    # Auth urls - IMPORTANT: Put auth URLs first to ensure they are matched before other patterns
+    # KPI Management urls - Most specific, must come first
+    path("kpi/", include("apps.kpi_management.urls")),
+    
+    # Auth urls - Specific paths, must come before catch-all patterns
     path("", include("apps.authentication.urls")),
 
-    # Dashboard urls
+    # Dashboard urls - Has catch-all pattern "", so comes after specific patterns
     path("", include("apps.dashboards.urls")),
 
     # layouts urls
@@ -83,9 +87,6 @@ urlpatterns += [
 
     # Tables urls
     path("", include("apps.tables.urls")),
-
-    # KPI Management urls
-    path("kpi/", include("apps.kpi_management.urls")),
 ]
 
 logger.info(f"Total URL patterns registered: {len(urlpatterns)}")
