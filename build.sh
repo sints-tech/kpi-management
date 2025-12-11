@@ -55,18 +55,32 @@ mkdir -p staticfiles
 
 # Collect static files
 echo "📁 Collecting static files..."
-python manage.py collectstatic --noinput --clear --verbosity 1
+echo "📂 STATIC_ROOT: $(python -c 'from django.conf import settings; print(settings.STATIC_ROOT)')"
+echo "📂 STATICFILES_DIRS: $(python -c 'from django.conf import settings; print(settings.STATICFILES_DIRS)')"
+
+# Collect static files with verbosity to see what's happening
+python manage.py collectstatic --noinput --clear --verbosity 2
 
 # Verify static files were collected
 echo "📁 Verifying static files collection..."
 if [ -d "staticfiles" ] && [ "$(ls -A staticfiles 2>/dev/null)" ]; then
     echo "✅ Static files collected successfully!"
     echo "📊 Static files count: $(find staticfiles -type f | wc -l)"
+    echo "📂 Sample files in staticfiles:"
+    find staticfiles -type f | head -10
+    # Check if vendor directory exists (critical for the app)
+    if [ -d "staticfiles/vendor" ]; then
+        echo "✅ Vendor directory exists!"
+        echo "📊 Vendor files count: $(find staticfiles/vendor -type f | wc -l)"
+    else
+        echo "⚠️  WARNING: Vendor directory not found in staticfiles!"
+    fi
 else
-    echo "⚠️  WARNING: Static files directory is empty!"
+    echo "❌ ERROR: Static files directory is empty or does not exist!"
     echo "📂 Listing staticfiles directory:"
     ls -la staticfiles/ || echo "Directory does not exist"
+    echo "❌ Build failed: Static files not collected!"
+    exit 1
 fi
 
 echo "✅ Build completed successfully!"
-

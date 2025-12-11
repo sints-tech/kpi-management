@@ -195,19 +195,23 @@ STATICFILES_DIRS = [
 
 # WhiteNoise Configuration untuk Production
 # https://whitenoise.readthedocs.io/en/latest/django.html
-# Gunakan WhiteNoise storage untuk production agar file di-compress dan di-cache dengan benar
+# IMPORTANT: Di production, WhiteNoise hanya melayani file dari STATIC_ROOT (setelah collectstatic)
+# Jangan gunakan USE_FINDERS di production karena akan mencari di STATICFILES_DIRS yang tidak ada di server
 if not DEBUG:
-    # Gunakan CompressedStaticFilesStorage untuk production (lebih sederhana dari CompressedManifestStaticFilesStorage)
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+    # Gunakan StaticFilesStorage untuk kompatibilitas maksimal (tidak perlu hashing)
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+    # Di production, WhiteNoise hanya melayani dari STATIC_ROOT (file yang sudah di-collect)
+    WHITENOISE_USE_FINDERS = False  # CRITICAL: Disable finders di production
+    WHITENOISE_AUTOREFRESH = False  # Disable auto-refresh untuk production
 else:
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+    WHITENOISE_USE_FINDERS = True  # Enable finders hanya di development
+    WHITENOISE_AUTOREFRESH = True  # Auto-refresh hanya di development
 
 # Konfigurasi WhiteNoise
-# Aktifkan finders supaya WhiteNoise mencari file di STATICFILES_DIRS jika STATIC_ROOT kosong
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh hanya di development
-WHITENOISE_INDEX_FILE = False
-WHITENOISE_KEEP_ONLY_HASHED_FILES = False
+WHITENOISE_INDEX_FILE = False  # Jangan serve index.html untuk directories
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
+WHITENOISE_MANIFEST_STRICT = False  # Jangan strict dengan manifest (lebih toleran)
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"
