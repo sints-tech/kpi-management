@@ -13,15 +13,49 @@ Refer to dashboards/urls.py file for more pages.
 class DashboardsView(TemplateView):
     # Predefined function
     def get_context_data(self, **kwargs):
-        # A function to init the global layout. It is defined in web_project/__init__.py file
-        context = TemplateLayout.init(self, super().get_context_data(**kwargs))
-
+        # Initialize context dengan error handling yang lebih robust
+        try:
+            context = TemplateLayout.init(self, super().get_context_data(**kwargs))
+        except Exception as e:
+            # Jika TemplateLayout.init error, create basic context
+            context = super().get_context_data(**kwargs)
+            context.update({
+                "layout_path": "templates/layout/master.html",
+            })
+        
         # Add KPI statistics dengan error handling
-        from apps.kpi_management.models import Story, DailyFeedReels, Campaign, CollabBrand, FYPPostValue
-        from django.db.models import Sum, Avg, Count
-        from django.utils import timezone
-        from datetime import timedelta
-        import json
+        try:
+            from apps.kpi_management.models import Story, DailyFeedReels, Campaign, CollabBrand, FYPPostValue
+            from django.db.models import Sum, Avg, Count
+            from django.utils import timezone
+            from datetime import timedelta
+            import json
+        except (ImportError, Exception) as e:
+            # Jika models tidak bisa di-import (migrations belum dijalankan), gunakan default values
+            try:
+                layout_path = TemplateHelper.set_layout("layout_vertical.html", context)
+            except:
+                layout_path = context.get("layout_path", "templates/layout/master.html")
+            
+            context.update({
+                "layout_path": layout_path,
+                "total_stories": 0,
+                "total_feeds": 0,
+                "total_campaigns": 0,
+                "total_collabs": 0,
+                "total_fyp_posts": 0,
+                "total_revenue": 0.0,
+                "pending_revenue": 0.0,
+                "engagement_avg": 0.0,
+                "total_views": 0,
+                "total_reach": 0,
+                "trend_data": "{}",
+                "platform_data": "{}",
+                "status_data": "{}",
+                "content_stats_data": "{}",
+                "is_admin": False,
+            })
+            return context
 
         try:
             total_stories = Story.objects.count()
