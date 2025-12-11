@@ -191,27 +191,29 @@ if not DEBUG:
 
 STATICFILES_DIRS = [
     BASE_DIR / "src" / "assets",
+    BASE_DIR / "assets",  # Add assets folder at root level (for vendor files)
+]
+
+# Static files finders - ensure all finders are enabled
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 ]
 
 # WhiteNoise Configuration untuk Production
 # https://whitenoise.readthedocs.io/en/latest/django.html
-# IMPORTANT: Di production, WhiteNoise hanya melayani file dari STATIC_ROOT (setelah collectstatic)
-# Jangan gunakan USE_FINDERS di production karena akan mencari di STATICFILES_DIRS yang tidak ada di server
-if not DEBUG:
-    # Gunakan StaticFilesStorage untuk kompatibilitas maksimal (tidak perlu hashing)
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-    # Di production, WhiteNoise hanya melayani dari STATIC_ROOT (file yang sudah di-collect)
-    WHITENOISE_USE_FINDERS = False  # CRITICAL: Disable finders di production
-    WHITENOISE_AUTOREFRESH = False  # Disable auto-refresh untuk production
-else:
-    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
-    WHITENOISE_USE_FINDERS = True  # Enable finders hanya di development
-    WHITENOISE_AUTOREFRESH = True  # Auto-refresh hanya di development
+# IMPORTANT: WhiteNoise akan mencari file di STATIC_ROOT terlebih dahulu, lalu fallback ke STATICFILES_DIRS jika USE_FINDERS enabled
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Konfigurasi WhiteNoise
+# Aktifkan USE_FINDERS untuk fallback jika file tidak ditemukan di STATIC_ROOT
+# Ini penting untuk production karena file mungkin belum dikumpulkan dengan benar atau ada di STATICFILES_DIRS
+WHITENOISE_USE_FINDERS = True  # Enable finders untuk fallback ke STATICFILES_DIRS
+WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh hanya di development
 WHITENOISE_INDEX_FILE = False  # Jangan serve index.html untuk directories
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
 WHITENOISE_MANIFEST_STRICT = False  # Jangan strict dengan manifest (lebih toleran)
+WHITENOISE_ROOT = STATIC_ROOT  # Explicitly set root untuk WhiteNoise
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"
