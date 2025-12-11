@@ -90,9 +90,20 @@ urlpatterns += [
 ]
 
 logger.info(f"Total URL patterns registered: {len(urlpatterns)}")
-# Log all URL patterns for debugging
-for pattern in urlpatterns:
-    logger.debug(f"URL pattern: {pattern}")
+# Log all URL patterns for debugging - use info level so it shows in production
+for i, pattern in enumerate(urlpatterns):
+    logger.info(f"URL pattern {i+1}: {pattern}")
+    
+# Specifically log authentication URLs
+try:
+    from apps.authentication import urls as auth_urls
+    logger.info("=" * 50)
+    logger.info("AUTHENTICATION URL PATTERNS:")
+    for i, pattern in enumerate(auth_urls.urlpatterns):
+        logger.info(f"  {i+1}. Pattern: {pattern.pattern}, View: {pattern.callback}, Name: {pattern.name}")
+    logger.info("=" * 50)
+except Exception as e:
+    logger.error(f"Error logging authentication URLs: {e}", exc_info=True)
 
 # Serve media files in development
 if settings.DEBUG:
