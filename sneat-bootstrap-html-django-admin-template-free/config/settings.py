@@ -208,6 +208,9 @@ WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = False
 WHITENOISE_INDEX_FILE = False
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False
+# Pastikan WhiteNoise melayani static files dengan benar
+WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_MANIFEST_STRICT = False
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"

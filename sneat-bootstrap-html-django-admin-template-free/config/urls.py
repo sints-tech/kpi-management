@@ -65,6 +65,9 @@ urlpatterns = [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Error handlers - hanya untuk URL yang benar-benar tidak ditemukan
+# Catatan: Handler ini hanya dipanggil jika URL tidak match dengan pattern apapun
+# Jangan menangkap static files - WhiteNoise sudah menangani itu
 handler404 = SystemView.as_view(template_name="pages_misc_error.html", status=404)
 handler400 = SystemView.as_view(template_name="pages_misc_error.html", status=400)
 handler500 = SystemView.as_view(template_name="pages_misc_error.html", status=500)
