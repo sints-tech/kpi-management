@@ -45,6 +45,8 @@ except ImportError as e:
 try:
     from apps.authentication import urls as auth_urls
     logger.info("Successfully imported apps.authentication.urls")
+    # Log the URL patterns from authentication app
+    logger.info(f"Authentication URL patterns: {[str(p.pattern) for p in auth_urls.urlpatterns]}")
 except Exception as e:
     logger.error(f"Failed to import apps.authentication.urls: {e}", exc_info=True)
 
@@ -87,6 +89,9 @@ urlpatterns += [
 ]
 
 logger.info(f"Total URL patterns registered: {len(urlpatterns)}")
+# Log all URL patterns for debugging
+for pattern in urlpatterns:
+    logger.debug(f"URL pattern: {pattern}")
 
 # Serve media files in development
 if settings.DEBUG:
