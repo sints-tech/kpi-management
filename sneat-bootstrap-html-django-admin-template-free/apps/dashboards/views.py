@@ -18,7 +18,12 @@ class DashboardsView(TemplateView):
             context = TemplateLayout.init(self, super().get_context_data(**kwargs))
         except Exception as e:
             # Fallback jika TemplateLayout.init gagal
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"TemplateLayout.init failed: {e}")
             context = super().get_context_data(**kwargs)
+            # Set minimal layout path
+            context['layout_path'] = 'layout/layout_vertical.html'
 
         # Add KPI statistics dengan error handling
         from apps.kpi_management.models import Story, DailyFeedReels, Campaign, CollabBrand, FYPPostValue
