@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # Test endpoint to verify URL routing works
+    path("test-url/", lambda request: HttpResponse("URL routing works!", content_type="text/plain")),
 ]
 
 # Debug endpoints (HAPUS setelah production stabil!)
