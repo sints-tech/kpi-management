@@ -34,11 +34,11 @@ class SystemView(TemplateView):
         # Extract status code from initkwargs and set it as an instance attribute
         status_code = initkwargs.pop('status', 200)
         view = super().as_view(**initkwargs)
-        
+
         def wrapped_view(request, *args, **kwargs):
             response = view(request, *args, **kwargs)
             if hasattr(response, 'status_code'):
                 response.status_code = status_code
             return response
-        
+
         return wrapped_view
