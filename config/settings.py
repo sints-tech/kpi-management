@@ -182,6 +182,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Pastikan folder staticfiles ada (untuk production)
+if not DEBUG:
+    STATIC_ROOT.mkdir(parents=True, exist_ok=True)
+
 STATICFILES_DIRS = [
     BASE_DIR / "src" / "assets",
 ]
@@ -192,8 +196,9 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 # Konfigurasi WhiteNoise
-# WhiteNoise akan otomatis menggunakan STATIC_ROOT, tidak perlu set WHITENOISE_ROOT
-WHITENOISE_USE_FINDERS = False  # Jangan gunakan finders di production (gunakan STATIC_ROOT saja)
+# Jika STATIC_ROOT kosong atau tidak ada file, gunakan finders sebagai fallback
+STATIC_ROOT_EXISTS = STATIC_ROOT.exists() and any(STATIC_ROOT.iterdir()) if STATIC_ROOT.exists() else False
+WHITENOISE_USE_FINDERS = not STATIC_ROOT_EXISTS if not DEBUG else False  # Gunakan finders jika STATIC_ROOT kosong
 WHITENOISE_AUTOREFRESH = False  # Jangan auto-refresh di production
 WHITENOISE_INDEX_FILE = False  # Jangan serve index files
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
