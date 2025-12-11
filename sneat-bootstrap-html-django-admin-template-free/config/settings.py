@@ -204,13 +204,15 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Konfigurasi WhiteNoise - Aktifkan finders untuk fallback ke STATICFILES_DIRS
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = False
-WHITENOISE_INDEX_FILE = False
-WHITENOISE_KEEP_ONLY_HASHED_FILES = False
-# Pastikan WhiteNoise melayani static files dengan benar
-WHITENOISE_ROOT = STATIC_ROOT
-WHITENOISE_MANIFEST_STRICT = False
+# IMPORTANT: WhiteNoise harus melayani static files SEBELUM request masuk ke Django URL routing
+WHITENOISE_USE_FINDERS = True  # Aktifkan finders untuk mencari file di STATICFILES_DIRS
+WHITENOISE_AUTOREFRESH = False  # Disable auto-refresh untuk production
+WHITENOISE_INDEX_FILE = False  # Jangan serve index.html untuk directories
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed
+WHITENOISE_ROOT = STATIC_ROOT  # Root directory untuk static files
+WHITENOISE_MANIFEST_STRICT = False  # Jangan strict dengan manifest
+# Tambahkan prefix static files
+WHITENOISE_STATIC_PREFIX = "/static/"
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"
