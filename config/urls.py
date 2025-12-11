@@ -39,6 +39,9 @@ except ImportError as e:
     logger.warning(f"Debug views not available: {e}")
 
 urlpatterns += [
+    # Auth urls - IMPORTANT: Put auth URLs first to ensure they are matched before other patterns
+    path("", include("apps.authentication.urls")),
+
     # Dashboard urls
     path("", include("apps.dashboards.urls")),
 
@@ -47,9 +50,6 @@ urlpatterns += [
 
     # Pages urls
     path("", include("apps.pages.urls")),
-
-    # Auth urls
-    path("", include("apps.authentication.urls")),
 
     # Card urls
     path("", include("apps.cards.urls")),
@@ -79,18 +79,11 @@ urlpatterns += [
 # Serve media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # Serve static files in development
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-# Fallback untuk static files di production jika WhiteNoise tidak bekerja
-# CATATAN: Ini hanya fallback. WhiteNoise seharusnya menangani ini.
-if not settings.DEBUG:
-    from django.contrib.staticfiles.views import serve
-    from django.views.decorators.cache import never_cache
-    from django.urls import re_path
-    
-    # Serve static files sebagai fallback jika WhiteNoise tidak bekerja
-    urlpatterns += [
-        re_path(r'^static/(?P<path>.*)$', never_cache(serve), {'document_root': settings.STATIC_ROOT}),
-    ]
+# CATATAN: Untuk production, WhiteNoise middleware akan menangani static files
+# Jangan tambahkan static file serving di sini untuk production karena akan mengganggu WhiteNoise
 
 handler404 = SystemView.as_view(template_name="pages_misc_error.html", status=404)
 handler400 = SystemView.as_view(template_name="pages_misc_error.html", status=400)
