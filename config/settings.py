@@ -41,10 +41,31 @@ DEBUG = os.environ.get("DEBUG", 'True').lower() in ['true', 'yes', '1']
 
 
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
-ALLOWED_HOSTS = [host.strip() for host in os.environ.get("ALLOWED_HOSTS", "localhost,0.0.0.0,127.0.0.1").split(",") if host.strip()]
+# Default ALLOWED_HOSTS includes Render.com domain
+ALLOWED_HOSTS_ENV = os.environ.get("ALLOWED_HOSTS")
+if ALLOWED_HOSTS_ENV:
+    ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",") if host.strip()]
+else:
+    # Default hosts including Render.com domain
+    ALLOWED_HOSTS = [
+        "localhost",
+        "0.0.0.0",
+        "127.0.0.1",
+        "kpi-management-creative.onrender.com",  # Render.com domain
+        ".onrender.com",  # Allow all Render.com subdomains
+    ]
 
 # CSRF Trusted Origins for production
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.environ.get("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
+# Default CSRF_TRUSTED_ORIGINS includes Render.com domain
+CSRF_TRUSTED_ORIGINS_ENV = os.environ.get("CSRF_TRUSTED_ORIGINS")
+if CSRF_TRUSTED_ORIGINS_ENV:
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(",") if origin.strip()]
+else:
+    # Default CSRF trusted origins for Render.com
+    CSRF_TRUSTED_ORIGINS = [
+        "https://kpi-management-creative.onrender.com",
+        "https://*.onrender.com",  # Allow all Render.com subdomains
+    ]
 
 # Current DJANGO_ENVIRONMENT
 ENVIRONMENT = os.environ.get("DJANGO_ENVIRONMENT", default="local")
@@ -213,8 +234,7 @@ WHITENOISE_AUTOREFRESH = DEBUG  # Auto-refresh hanya di development
 WHITENOISE_INDEX_FILE = False  # Jangan serve index.html untuk directories
 WHITENOISE_KEEP_ONLY_HASHED_FILES = False  # Keep all files, not just hashed ones
 WHITENOISE_MANIFEST_STRICT = False  # Jangan strict dengan manifest (lebih toleran)
-# Jangan set WHITENOISE_ROOT karena WhiteNoise akan otomatis menggunakan STATIC_ROOT
-# Jika set, WhiteNoise hanya akan mencari di root tersebut dan tidak akan fallback ke STATICFILES_DIRS
+WHITENOISE_ROOT = STATIC_ROOT  # Explicitly set root untuk WhiteNoise
 
 # Media files (User uploaded files)
 MEDIA_URL = "/media/"
