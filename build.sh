@@ -61,27 +61,39 @@ echo "📂 STATICFILES_DIRS: $(python -c 'from django.conf import settings; prin
 # Verify vendor files exist before collectstatic
 echo "🔍 Checking for vendor files..."
 echo "📂 Current working directory: $(pwd)"
-echo "📂 Checking src/assets/vendor:"
-if [ -d "src/assets/vendor" ]; then
-    echo "✅ Vendor directory found at src/assets/vendor"
-    echo "📊 Vendor files count: $(find src/assets/vendor -type f | wc -l)"
-    echo "📂 Sample vendor files:"
-    find src/assets/vendor -type f | head -5
-    # Verify critical vendor files exist
-    if [ -f "src/assets/vendor/css/core.css" ] && [ -f "src/assets/vendor/libs/jquery/jquery.js" ]; then
-        echo "✅ Critical vendor files found!"
-    else
-        echo "⚠️  WARNING: Some critical vendor files missing!"
+echo "📂 Checking for vendor files in multiple possible locations..."
+
+VENDOR_FOUND=false
+VENDOR_PATH=""
+
+# Check multiple possible vendor locations
+for vendor_path in "src/assets/vendor" "../src/assets/vendor" "../../src/assets/vendor"; do
+    if [ -d "$vendor_path" ]; then
+        echo "✅ Vendor directory found at: $vendor_path"
+        VENDOR_FOUND=true
+        VENDOR_PATH="$vendor_path"
+        echo "📊 Vendor files count: $(find "$vendor_path" -type f | wc -l)"
+        echo "📂 Sample vendor files:"
+        find "$vendor_path" -type f | head -5
+        # Verify critical vendor files exist
+        if [ -f "$vendor_path/css/core.css" ] && [ -f "$vendor_path/libs/jquery/jquery.js" ]; then
+            echo "✅ Critical vendor files found!"
+            break
+        else
+            echo "⚠️  WARNING: Some critical vendor files missing in $vendor_path!"
+        fi
     fi
-else
-    echo "❌ ERROR: Vendor directory not found at src/assets/vendor!"
+done
+
+if [ "$VENDOR_FOUND" = false ]; then
+    echo "❌ ERROR: Vendor directory not found in any expected location!"
     echo "📂 Listing current directory:"
     ls -la
     echo "📂 Listing src directory:"
     ls -la src/ 2>/dev/null || echo "src directory does not exist"
-    echo "📂 Listing src/assets directory:"
-    ls -la src/assets/ 2>/dev/null || echo "src/assets directory does not exist"
-    echo "❌ Build will fail if vendor files are not found!"
+    echo "📂 Listing parent directory:"
+    ls -la ../ 2>/dev/null || echo "parent directory not accessible"
+    echo "⚠️  WARNING: Build will continue but vendor files may not be collected!"
 fi
 
 # Collect static files with verbosity to see what's happening
