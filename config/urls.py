@@ -80,6 +80,18 @@ urlpatterns += [
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
+# Fallback untuk static files di production jika WhiteNoise tidak bekerja
+# CATATAN: Ini hanya fallback. WhiteNoise seharusnya menangani ini.
+if not settings.DEBUG:
+    from django.contrib.staticfiles.views import serve
+    from django.views.decorators.cache import never_cache
+    from django.urls import re_path
+    
+    # Serve static files sebagai fallback jika WhiteNoise tidak bekerja
+    urlpatterns += [
+        re_path(r'^static/(?P<path>.*)$', never_cache(serve), {'document_root': settings.STATIC_ROOT}),
+    ]
+
 handler404 = SystemView.as_view(template_name="pages_misc_error.html", status=404)
 handler400 = SystemView.as_view(template_name="pages_misc_error.html", status=400)
 handler500 = SystemView.as_view(template_name="pages_misc_error.html", status=500)
