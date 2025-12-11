@@ -14,7 +14,8 @@ def environment(request):
 # Add is_admin to context for menu
 def kpi_context(request):
     is_admin = False
-    if request.user.is_authenticated:
+    # Check if user attribute exists and is authenticated
+    if hasattr(request, 'user') and request.user.is_authenticated:
         try:
             from apps.kpi_management.models import Profile
             # Use select_related to avoid extra queries
