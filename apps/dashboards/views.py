@@ -200,7 +200,10 @@ class DashboardsView(TemplateView):
         # Check admin permission
         try:
             from apps.kpi_management.views import check_admin_permission
-            is_admin = check_admin_permission(self.request.user)
+            if hasattr(self.request, 'user') and self.request.user.is_authenticated:
+                is_admin = check_admin_permission(self.request.user)
+            else:
+                is_admin = False
         except Exception:
             is_admin = False
 

@@ -21,23 +21,22 @@ from django.conf import settings
 from django.conf.urls.static import static
 from web_project.views import SystemView
 
-# Debug imports (HAPUS setelah production stabil!)
-try:
-    from apps.dashboards.views_debug import HealthCheckView, RunMigrationsView
-    DEBUG_ENABLED = True
-except ImportError:
-    DEBUG_ENABLED = False
-
 urlpatterns = [
     path("admin/", admin.site.urls),
 ]
 
-# Add debug endpoints if available
-if DEBUG_ENABLED:
+# Debug endpoints (HAPUS setelah production stabil!)
+try:
+    from apps.dashboards.views_debug import HealthCheckView, RunMigrationsView
     urlpatterns += [
         path("health/", HealthCheckView.as_view(), name="health-check"),
         path("run-migrations/", RunMigrationsView.as_view(), name="run-migrations"),
     ]
+except ImportError as e:
+    # Jika views_debug tidak ada, skip debug endpoints
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.warning(f"Debug views not available: {e}")
 
 urlpatterns += [
     # Dashboard urls
