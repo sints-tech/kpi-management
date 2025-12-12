@@ -872,10 +872,10 @@
     }
 
     // Calculate percentages from series data
-    let seriesData = contentStatsData && contentStatsData.series ? contentStatsData.series : [1, 1, 1, 1];
+    let seriesData = contentStatsData && contentStatsData.series ? contentStatsData.series : [0, 0, 0, 0];
     let total = seriesData.reduce((a, b) => a + b, 0);
-    let percentages = total > 0 ? seriesData.map(val => Math.round((val / total) * 100)) : [25, 25, 25, 25];
-    let weeklyPercentage = percentages[0] || 25; // Use first category as "Weekly" percentage
+    let percentages = total > 0 ? seriesData.map(val => Math.round((val / total) * 100)) : [0, 0, 0, 0];
+    let weeklyPercentage = total > 0 ? (percentages[0] || 0) : 0; // Use first category as "Weekly" percentage, 0% if no data
 
     const orderStatisticsChartConfig = {
       chart: {

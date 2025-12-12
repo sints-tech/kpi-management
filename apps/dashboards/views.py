@@ -224,19 +224,17 @@ class DashboardsView(TemplateView):
             content_stats_data = {
                 'labels': ['Stories', 'Feed/Reels', 'Campaigns', 'Collabs'],
                 'series': [
-                    total_stories if total_content > 0 else 0,
-                    total_feeds if total_content > 0 else 0,
-                    total_campaigns if total_content > 0 else 0,
-                    total_collabs if total_content > 0 else 0,
+                    total_stories,
+                    total_feeds,
+                    total_campaigns,
+                    total_collabs,
                 ]
             }
-            # Jika semua 0, set default values untuk chart
-            if total_content == 0:
-                content_stats_data['series'] = [1, 1, 1, 1]  # Default untuk visualisasi
+            # Tidak perlu set default values, biarkan 0 jika tidak ada data
         except Exception:
             content_stats_data = {
                 'labels': ['Stories', 'Feed/Reels', 'Campaigns', 'Collabs'],
-                'series': [1, 1, 1, 1]
+                'series': [0, 0, 0, 0]
             }
 
         # Check admin permission
