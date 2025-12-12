@@ -35,8 +35,14 @@ class AuthView(TemplateView):
     
     def post(self, request, *args, **kwargs):
         """Handle login form submission"""
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(f"AuthView.post called for path: {request.path}")
+        
         email_username = request.POST.get('email-username', '')
         password = request.POST.get('password', '')
+        
+        logger.info(f"Login attempt - email_username: {email_username[:3]}***, password length: {len(password)}")
         
         if email_username and password:
             # Try to authenticate with username or email
@@ -47,14 +53,21 @@ class AuthView(TemplateView):
                     from django.contrib.auth.models import User
                     user_obj = User.objects.get(email=email_username)
                     user = authenticate(request, username=user_obj.username, password=password)
+                    logger.info(f"Tried authentication with email, found user: {user_obj.username if user_obj else 'None'}")
                 except User.DoesNotExist:
+                    logger.warning(f"User with email {email_username} not found")
                     pass
             
             if user is not None:
                 login(request, user)
+                logger.info(f"Login successful for user: {user.username}")
                 messages.success(request, 'Login berhasil!')
                 return redirect('index')
             else:
+                logger.warning(f"Login failed - invalid credentials for: {email_username[:3]}***")
                 messages.error(request, 'Username/Email atau password salah!')
+        else:
+            logger.warning("Login attempt with empty email_username or password")
+            messages.error(request, 'Email/Username dan password harus diisi!')
         
         return self.get(request, *args, **kwargs)
