@@ -52,6 +52,12 @@ python manage.py migrate --noinput || {
     echo "⚠️  Migrations had warnings, but continuing..."
 }
 
+# Create admin user if it doesn't exist
+echo "👤 Creating admin user if not exists..."
+python create_superuser.py || {
+    echo "⚠️ Failed to create admin user, but continuing..."
+}
+
 # Create staticfiles directory
 echo "📁 Creating staticfiles directory..."
 mkdir -p staticfiles
