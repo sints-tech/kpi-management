@@ -150,7 +150,7 @@ if [ -d "staticfiles" ] && [ "$(ls -A staticfiles 2>/dev/null)" ]; then
         ls -la staticfiles/ || echo "Directory does not exist"
         echo "📂 Checking if vendor exists in source:"
         ls -la src/assets/vendor/ 2>/dev/null || echo "src/assets/vendor does not exist"
-        
+
         # Try to manually copy vendor files if they exist but weren't collected
         if [ -d "src/assets/vendor" ]; then
             echo "🔧 Attempting to manually copy vendor files..."
@@ -162,7 +162,7 @@ if [ -d "staticfiles" ] && [ "$(ls -A staticfiles 2>/dev/null)" ]; then
                     echo "❌ Manual copy also failed!"
                 }
             }
-            
+
             # Verify manual copy worked
             if [ -d "staticfiles/vendor" ] && [ "$(ls -A staticfiles/vendor 2>/dev/null)" ]; then
                 echo "✅ Vendor files manually copied successfully!"
