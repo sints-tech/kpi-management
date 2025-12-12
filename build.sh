@@ -62,6 +62,12 @@ python create_superuser.py || {
 echo "📁 Creating staticfiles directory..."
 mkdir -p staticfiles
 
+# Create media directory for user uploads (avatars, logos, etc.)
+echo "📁 Creating media directory..."
+mkdir -p media/avatars
+mkdir -p media/logos
+echo "✅ Media directories created"
+
 # Collect static files
 echo "📁 Collecting static files..."
 echo "📂 STATIC_ROOT: $(python -c 'from django.conf import settings; print(settings.STATIC_ROOT)')"

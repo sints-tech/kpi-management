@@ -20,10 +20,8 @@ from django.urls import include, path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
-from django.views.static import serve
 from web_project.views import SystemView
 import logging
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +57,7 @@ except Exception as e:
 urlpatterns += [
     # KPI Management urls - Most specific, must come first
     path("kpi/", include("apps.kpi_management.urls")),
-    
+
     # Auth urls - Specific paths, must come before catch-all patterns
     path("", include("apps.authentication.urls")),
 
@@ -98,7 +96,7 @@ logger.info(f"Total URL patterns registered: {len(urlpatterns)}")
 # Log all URL patterns for debugging - use info level so it shows in production
 for i, pattern in enumerate(urlpatterns):
     logger.info(f"URL pattern {i+1}: {pattern}")
-    
+
 # Specifically log authentication URLs
 try:
     from apps.authentication import urls as auth_urls
@@ -116,13 +114,20 @@ if settings.DEBUG:
     # Serve static files in development
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 else:
+    # Serve media files in production (Render.com)
+    # IMPORTANT: Render.com uses ephemeral file system, so files will be lost on redeploy
+    # For production, we need to serve media files through Django URL patterns
+    from django.views.static import serve
+    from django.urls import re_path
+    import os
+    
     # Serve media files in production
-    # IMPORTANT: This is a workaround for Render.com free tier
-    # For production at scale, use cloud storage (S3, Cloudinary, etc.)
-    media_root = os.path.join(settings.BASE_DIR, 'media')
-    urlpatterns += [
-        path('media/<path:path>', serve, {'document_root': media_root}),
-    ]
+    media_root = settings.MEDIA_ROOT
+    if os.path.exists(media_root):
+        urlpatterns += [
+            re_path(r'^media/(?P<path>.*)$', serve, {'document_root': media_root}),
+        ]
+        logger.info(f"Media files serving enabled for production. MEDIA_ROOT: {media_root}")
 
 # CATATAN: Untuk production, WhiteNoise middleware akan menangani static files
 # Jangan tambahkan static file serving di sini untuk production karena akan mengganggu WhiteNoise
