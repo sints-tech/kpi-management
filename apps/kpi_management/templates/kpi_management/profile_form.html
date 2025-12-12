@@ -39,8 +39,9 @@
           const file = e.target.files[0];
           if (file) {
             // Validate file type
-            if (!file.type.match('image.*')) {
-              alert('Harap pilih file gambar (JPG, PNG, atau GIF)');
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+              alert('Harap pilih file gambar (JPG, PNG, GIF, atau WEBP)');
               this.value = '';
               return;
             }
@@ -100,7 +101,7 @@
                   <span class="d-none d-sm-block">Reset</span>
                 </button>
 
-                <div>Allowed JPG, GIF or PNG. Max size of 800K</div>
+                <div>Allowed JPG, GIF, PNG or WEBP. Max size of 800K</div>
                 {% if form.avatar.errors %}
                 <div class="text-danger">{{ form.avatar.errors }}</div>
                 {% endif %}

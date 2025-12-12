@@ -376,7 +376,7 @@ class ProfileForm(forms.ModelForm):
             'phone': forms.TextInput(attrs={'class': 'form-control', 'id': 'phoneNumber', 'placeholder': '202 555 0111'}),
             'address': forms.TextInput(attrs={'class': 'form-control', 'id': 'address', 'placeholder': 'Address'}),
             'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'avatar': forms.FileInput(attrs={'class': 'account-file-input', 'id': 'upload', 'style': 'display: none;', 'accept': 'image/png, image/jpeg, image/jpg, image/gif'}),
+            'avatar': forms.FileInput(attrs={'class': 'account-file-input', 'id': 'upload', 'style': 'display: none;', 'accept': 'image/png, image/jpeg, image/jpg, image/gif, image/webp'}),
             'brand_name': forms.TextInput(attrs={'class': 'form-control'}),
             'logo': forms.FileInput(attrs={'class': 'form-control', 'accept': 'image/*'}),
             'category': forms.Select(attrs={'class': 'form-select'}, choices=Profile.CATEGORY_CHOICES),
@@ -412,9 +412,9 @@ class ProfileForm(forms.ModelForm):
                 raise forms.ValidationError('Ukuran file terlalu besar. Maksimal 800KB.')
             
             # Validasi tipe file
-            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif']
+            allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp']
             if avatar.content_type not in allowed_types:
-                raise forms.ValidationError('Format file tidak didukung. Gunakan JPG, PNG, atau GIF.')
+                raise forms.ValidationError('Format file tidak didukung. Gunakan JPG, PNG, GIF, atau WEBP.')
         
         return avatar
 
